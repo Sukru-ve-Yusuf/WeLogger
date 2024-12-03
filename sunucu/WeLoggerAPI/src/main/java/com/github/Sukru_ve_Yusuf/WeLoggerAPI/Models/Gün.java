@@ -14,10 +14,14 @@ import java.util.*;
  * @see Video
  * @see IKimlikli
  */
-public class Gün implements IKimlikli{
+public class Gün implements IKimlikli
+{
     private Kullanıcı iye;
     private String açıklama;
+    private Video[] videolar;
+    private Date tarih;
     private byte[] kimlik;
+    
     
     @Override
     public byte[] getKimlikBytes()

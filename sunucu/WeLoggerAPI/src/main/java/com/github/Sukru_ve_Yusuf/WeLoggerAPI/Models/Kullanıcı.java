@@ -15,7 +15,7 @@ public class Kullanıcı implements IKimlikli
 {
     private String ad;
     private String kullanıcı_adı;
-    private String parola;
+    private Parola parola;
     private byte[] kimlik;
     
     public String getAd()

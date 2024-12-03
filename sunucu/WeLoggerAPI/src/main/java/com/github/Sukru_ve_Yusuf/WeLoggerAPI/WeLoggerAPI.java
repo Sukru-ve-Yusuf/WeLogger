@@ -5,7 +5,7 @@
 
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI;
 
-import com.github.Sukru_ve_Yusuf.WeLoggerAPI.*;
+import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models.*;
 
 import java.util.*;
 import org.apache.cxf.jaxrs.*;
@@ -17,7 +17,7 @@ import org.apache.cxf.jaxrs.*;
  */
 public class WeLoggerAPI {
 
-    public static void main(String[] args) {
-        
+    public static void main(String[] args)
+    {
     }
 }
