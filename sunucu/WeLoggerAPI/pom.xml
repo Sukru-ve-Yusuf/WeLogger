@@ -17,9 +17,15 @@
             <version>4.0.5</version>
         </dependency>
         <dependency>
-            <groupId>de.mkammerer</groupId>
-            <artifactId>argon2-jvm</artifactId>
-            <version>2.11</version>
+            <groupId>com.kosprov.jargon2</groupId>
+            <artifactId>jargon2-api</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.kosprov.jargon2</groupId>
+            <artifactId>jargon2-native-ri-backend</artifactId>
+            <version>1.1.1</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 </project>
