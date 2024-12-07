@@ -10,7 +10,6 @@
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
-
 import java.util.*;
 import java.security.SecureRandom;
 
@@ -62,6 +61,29 @@ public class Video implements IKimlikli
         this.iye = iye;
         this.tarih = tarih;
         this.KimliğiYenile();
+    }
+    /**
+     * Başka bir video nesnesinin içeriğinden yeni bir video nesnesi oluşturur.
+     * İsteğe bağlı olarak kimlik korunabilir ya da yenilenebilir.
+     * 
+     * @param başka_video       İçeriği alınacak video nesnesi
+     * @param kimlik_yenilensin true ise yeni bir kimlik atanır,
+     *                          false ise kaynak nesnenin kimliği kopyalanır.
+     */
+    public Video(Video başka_video, boolean kimlik_yenilensin)
+    {
+        this.setDosyaYolu(başka_video.getDosyaYolu());
+        this.setAçıklama(başka_video.getAçıklama());
+        this.setİye(başka_video.getİye());
+        this.setTarih(başka_video.getTarih());
+        if (kimlik_yenilensin)
+        {
+            this.KimliğiYenile();
+        }
+        else
+        {
+            this.kimlik = başka_video.getKimlikBytes().clone();
+        }
     }
     
     /**
@@ -152,15 +174,23 @@ public class Video implements IKimlikli
      */
     public Date getTarih()
     {
+        if (this.tarih == null)
+        {
+            return null;
+        }
         return (Date)this.tarih.clone();
     }
     /**
      * Videonun çekildiği tarihi belirtilen yeni tarih olarak değiştirir.
+     * Verilen yeni tarih null ise işlem yapmaz.
      * 
      * @param yeni_tarih    Videonun yeni tarihi
      */
     public void setTarih(Date yeni_tarih)
     {
-        this.tarih = (Date)yeni_tarih.clone();
+        if (yeni_tarih != null)
+        {
+            this.tarih = (Date)yeni_tarih.clone();
+        }
     }
 }
