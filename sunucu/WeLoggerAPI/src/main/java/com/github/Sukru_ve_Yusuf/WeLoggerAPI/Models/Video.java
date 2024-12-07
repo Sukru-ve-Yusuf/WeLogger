@@ -41,9 +41,9 @@ public class Video implements IKimlikli
     private byte[] kimlik;
     /**
      * Videonun çekildiği tarih ve saat.
-     * @see java.util.Date
+     * @see java.util.Calendar
      */
-    private Date tarih;
+    private Calendar tarih;
     
     /**
      * Verilen bilgilerle yeni bir video nesnesi oluşturur.
@@ -54,7 +54,7 @@ public class Video implements IKimlikli
      * @param iye           Videonun sahibi olan kullanıcı
      * @param tarih         Videonun çekildiği tarih ve saat bilgisi
      */
-    public Video(String dosya_yolu, String açıklama, Kullanıcı iye, Date tarih)
+    public Video(String dosya_yolu, String açıklama, Kullanıcı iye, Calendar tarih)
     {
         this.dosya_yolu = dosya_yolu;
         this.açıklama = açıklama;
@@ -170,15 +170,15 @@ public class Video implements IKimlikli
     /**
      * Videonun çekildiği tarihi bildirir.
      * 
-     * @return  Videonun çekildiği tarihi bildiren Date nesnesinin klonu
+     * @return  Videonun çekildiği tarihi bildiren Calendar nesnesinin klonu
      */
-    public Date getTarih()
+    public Calendar getTarih()
     {
         if (this.tarih == null)
         {
             return null;
         }
-        return (Date)this.tarih.clone();
+        return (Calendar)this.tarih.clone();
     }
     /**
      * Videonun çekildiği tarihi belirtilen yeni tarih olarak değiştirir.
@@ -186,11 +186,11 @@ public class Video implements IKimlikli
      * 
      * @param yeni_tarih    Videonun yeni tarihi
      */
-    public void setTarih(Date yeni_tarih)
+    public void setTarih(Calendar yeni_tarih)
     {
         if (yeni_tarih != null)
         {
-            this.tarih = (Date)yeni_tarih.clone();
+            this.tarih = (Calendar)yeni_tarih.clone();
         }
     }
 }

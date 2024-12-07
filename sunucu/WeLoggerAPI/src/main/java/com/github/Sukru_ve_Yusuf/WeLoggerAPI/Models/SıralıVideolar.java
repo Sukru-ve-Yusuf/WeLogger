@@ -41,7 +41,7 @@ implements IBağlıListe<SıralıVideolar>
      * @param tarih         Videonun çekildiği tarih ve saat bilgisi
      */
     public SıralıVideolar(String dosya_yolu, String açıklama,
-            Kullanıcı iye, Date tarih)
+            Kullanıcı iye, Calendar tarih)
     {
         super(dosya_yolu, açıklama, iye, tarih);
         this.önceki = null;

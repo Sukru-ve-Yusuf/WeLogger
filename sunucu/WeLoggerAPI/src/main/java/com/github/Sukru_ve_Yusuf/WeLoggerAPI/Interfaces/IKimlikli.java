@@ -1,15 +1,19 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
+ * IKimlikli
+ * 
+ * Sürüm 0.1
+ * 
+ * Aralık 2024
+ * 
+ * Copyright (C) 2024 Yusuf Kozan, Şükrü Fırat Sarp
  */
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces;
 
 /**
- * Eşsiz kimliğe ihtiyaç duyan nesneler için yapılmış bir arayüz
- * 
- * @author yusuf
+ * Eşsiz kimliğe ihtiyaç duyan nesneler için yapılmış bir arayüz.
  */
-public interface IKimlikli {
+public interface IKimlikli
+{
     /**
      * Kimliği ikili sayı biçiminde döndürür.
      * 
