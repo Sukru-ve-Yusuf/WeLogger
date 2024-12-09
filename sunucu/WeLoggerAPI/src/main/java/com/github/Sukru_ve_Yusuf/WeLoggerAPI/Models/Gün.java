@@ -66,6 +66,25 @@ public class Gün implements IKimlikli
         this.setTarih(tarih);
         this.KimliğiYenile();
     }
+    /**
+     * Başka bir Gün nesnesini kullanarak yeni bir Gün nesnesi oluşturur.
+     * İsteğe bağlı olarak kimlik korunabilir ya da yenilenebilir.
+     * 
+     * @param başka_gün         İçeriği alınacak gün nesnesi
+     * @param kimlik_yenilensin true ise yeni kimlik atanır,
+     *                          false ise kaynak nesnenin kimliği kopyalanır.
+     */
+    public Gün(Gün başka_gün, boolean kimlik_yenilensin)
+    {
+        this.başkahraman = başka_gün.getBaşkahraman();
+        this.setAçıklama(başka_gün.getAçıklama());
+        this.setVideolar(başka_gün.getVideolar());
+        this.setTarih(başka_gün.getTarih());
+        if (kimlik_yenilensin)
+            this.KimliğiYenile();
+        else
+            this.kimlik = başka_gün.getKimlikBytes().clone();
+    }
     
     /**
      * Günün başkahramanını temsil eden Kullanıcı nesnesine erişim sağlar.

@@ -10,7 +10,9 @@
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces;
 
 /**
- * Bağlı Liste olarak tutulması gereken nesneler için bir arayüz.
+ * Bağlı liste olarak tutulması gereken nesneler için bir arayüz.
+ * 
+ * @param <T>   Bağlı listede tutulacak verinin türü
  */
 public interface IBağlıListe<T>
 {

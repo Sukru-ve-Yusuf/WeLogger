@@ -17,10 +17,10 @@ import java.util.*;
  * çift yönlü bağlı liste olarak tutan sınıf.
  * 
  * @see Video
- * @see IBağlıListe
+ * @see IÇiftYönlüBağlıListe
  */
-public class SıralıVideolar extends Video
-implements IBağlıListe<SıralıVideolar>
+public class SıralıVideolar extends Video 
+        implements IÇiftYönlüBağlıListe<SıralıVideolar>
 {
     /**
      * Tarihsel sıralamada bir geçmişteki video.
@@ -123,6 +123,7 @@ implements IBağlıListe<SıralıVideolar>
      * 
      * @return  Listenin en geçmişteki videosu
      */
+    @Override
     public SıralıVideolar Kök()
     {
         SıralıVideolar kafa = this;
@@ -149,22 +150,26 @@ implements IBağlıListe<SıralıVideolar>
         return kafa;
     }
     
-    /**
-     * Videoyu listeden koparır ve listenin kalanlarını birbirine bağlar.
-     * 
-     * @return  Listeden kopmuş video
-     */
+    @Override
     public SıralıVideolar Kopar()
     {
         SıralıVideolar önce = this.getÖnceki();
         SıralıVideolar sonra = this.getSonraki();
-        if (önce != null)
-            önce.setSonraki(sonra);
-        if (sonra != null)
-            sonra.setÖnceki(önce);
+        
         this.setÖnceki(null);
         this.setSonraki(null);
-        return this;
+        
+        if (sonra != null)
+        {
+            sonra.setÖnceki(önce);
+        }
+        if (önce != null)
+        {
+            önce.setSonraki(sonra);
+            // Dönüş önceliği köke yakın olsun diye 
+            return önce;
+        }
+        return sonra;
     }
     
     /**
@@ -179,7 +184,7 @@ implements IBağlıListe<SıralıVideolar>
     /**
      * Belirtilen videoyu bir geçmişteki video olarak tanımlar.
      * Belirtilen videonun tarihine erişilemiyorsa işlem yapılmaz.
-     * Belirtilen videonun tarihi daha önce değilse işlem yapılmaz.
+     * Belirtilen videonun tarihi daha sonraysa işlem yapılmaz.
      * 
      * @param önceki    Bir geçmişe yerleştirilecek video
      * @return  İşlem başarılıysa true, başarısızsa false
@@ -196,8 +201,8 @@ implements IBağlıListe<SıralıVideolar>
         {
             return false;
         }
-        // Önceki gerçekten de önce geliyorsa
-        if (önceki.getTarih().before(this.getTarih()))
+        // Yeni önceki gerçekten de sonra gelmiyorsa
+        if (!önceki.getTarih().after(this.getTarih()))
         {
             this.önceki = önceki;
             return true;
@@ -219,7 +224,7 @@ implements IBağlıListe<SıralıVideolar>
     /**
      * Belirtilen videoyu bir gelecekteki video olarak tanımlar.
      * Belirtilen videonun tarihine erişilemiyorsa işlem yapılmaz.
-     * Belirtilen videonun tarihi daha sonra değilse işlem yapılmaz.
+     * Belirtilen videonun tarihi daha önceyse işlem yapılmaz.
      * 
      * @param sonraki    Bir geleceğe yerleştirilecek video
      * @return  İşlem başarılıysa true, başarısızsa false
@@ -236,8 +241,8 @@ implements IBağlıListe<SıralıVideolar>
         {
             return false;
         }
-        // Sonraki gerçekten de sonra geliyorsa
-        if (sonraki.getTarih().after(this.getTarih()))
+        // Yeni sonraki gerçekten de önce gelmiyorsa
+        if (!sonraki.getTarih().before(this.getTarih()))
         {
             this.sonraki = sonraki;
             return true;
