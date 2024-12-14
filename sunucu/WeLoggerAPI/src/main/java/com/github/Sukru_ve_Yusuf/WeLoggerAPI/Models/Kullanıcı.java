@@ -197,15 +197,18 @@ public class Kullanıcı implements IKimlikli
      * Bu kullanıcının başkahraman olduğu günlerin listesini tanımlar.
      * Verilen günlerin başkahramanı bu kişi değilse işlem yapılmaz.
      * 
-     * @param ömür  Bu kullanıcının başkahraman olduğu günlerin sıralı listesi
+     * @param ömür  Bu kullanıcının başkahraman olduğu günler
      * @return  Ömür yenilenirse true, yenilenmezse false
      */
     @JsonIgnore
     public boolean setÖmür(SıralıGünler ömür)
     {
-        Kullanıcı bu_kişi = this;
+        if (ömür == null)
+        {
+            return false;
+        }
         
-        if (bu_kişi.getKimlikBase64() == ömür.getBaşkahraman())
+        if (this.getKimlikBase64().equals(ömür.getBaşkahraman()))
         {
             this.ömür = ömür;
             return true;

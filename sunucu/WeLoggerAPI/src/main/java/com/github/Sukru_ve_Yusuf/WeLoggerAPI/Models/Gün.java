@@ -64,11 +64,11 @@ public class Gün implements IKimlikli
     public Gün(Kullanıcı başkahraman, String açıklama, SıralıVideolar videolar,
             Calendar tarih)
     {
+        this.setTarih(tarih);
+        this.KimliğiYenile();
         this.başkahraman = başkahraman.getKimlikBase64();
         this.setAçıklama(açıklama);
         this.setVideolar(videolar);
-        this.setTarih(tarih);
-        this.KimliğiYenile();
     }
     /**
      * Başka bir Gün nesnesini kullanarak yeni bir Gün nesnesi oluşturur.
@@ -180,11 +180,17 @@ public class Gün implements IKimlikli
     @JsonIgnore
     public boolean setVideolar(SıralıVideolar videolar)
     {
+        if (videolar == null)
+        {
+            this.videolar = null;
+            return true;
+        }
+        
         Calendar bu_gün = this.getTarih();
         Calendar video_günü = videolar.getTarih();
         boolean aynı_günde = (bu_gün.get(Calendar.YEAR) == video_günü.get(Calendar.YEAR))
                 && (bu_gün.get(Calendar.DAY_OF_YEAR) == video_günü.get(Calendar.DAY_OF_YEAR));
-        boolean aynı_iye = this.getBaşkahraman() == videolar.getİye();
+        boolean aynı_iye = this.getBaşkahraman().equals(videolar.getİye());
         if (aynı_günde && aynı_iye)
         {
             this.videolar = videolar;

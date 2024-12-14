@@ -113,7 +113,7 @@ public class Video implements IKimlikli
     {
         this.setDosyaYolu(dosya_yolu);
         this.setAçıklama(açıklama);
-        this.setİye(iye);
+        this.setİye(iye_base64);
         this.setTarih(tarih);
         Base64.Decoder b64decoder = Base64.getDecoder();
         this.kimlik = b64decoder.decode(kimlik_base64);
