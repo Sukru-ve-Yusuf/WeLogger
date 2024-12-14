@@ -12,6 +12,7 @@ package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
 import java.util.*;
 import java.security.SecureRandom;
+import com.fasterxml.jackson.annotation.*;
 
 /**
  * Kullanıcıların çektiği videoların her birini temsil eder.
@@ -20,31 +21,42 @@ import java.security.SecureRandom;
  * @see VideoListesi
  * @see IKimlikli
  */
+@JsonPropertyOrder({"_id", "DosyaYolu", "Açıklama", "İye", "Tarih"})
 public class Video implements IKimlikli
 {
     /**
      * Videonun dosya sistemindeki adresi.
      */
-    private String dosya_yolu;
+    protected String dosya_yolu;
     /**
      * Kullanıcının video hakkındaki açıklama yazısı.
      */
-    private String açıklama;
+    protected String açıklama;
     /**
-     * Videonun sahibi olan kullanıcı.
-     * @see Kullanıcı
+     * Base64 metni olarak videonun sahibi olan kullanıcının kimliği.
+     * @see Kullanıcı#kimlik
      */
-    private Kullanıcı iye;
+    protected String iye;
     /**
      * Video nesnesini ayırt etmek için eşsiz bir sayı.
      */
-    private byte[] kimlik;
+    protected byte[] kimlik;
     /**
      * Videonun çekildiği tarih ve saat.
      * @see java.util.Calendar
      */
-    private Calendar tarih;
+    protected Calendar tarih;
     
+    /**
+     * Belirtilen kimlikle boş bir video nesnesi oluşturur.
+     * 
+     * @param kimlik_base64 Base64 metni olarak video kimliği
+     */
+    protected Video(String kimlik_base64)
+    {
+        Base64.Decoder b64decoder = Base64.getDecoder();
+        this.kimlik = b64decoder.decode(kimlik_base64);
+    }
     /**
      * Verilen bilgilerle yeni bir video nesnesi oluşturur.
      * Oluşturulan nesneye yeni bir kimlik atanır.
@@ -54,13 +66,57 @@ public class Video implements IKimlikli
      * @param iye           Videonun sahibi olan kullanıcı
      * @param tarih         Videonun çekildiği tarih ve saat bilgisi
      */
-    public Video(String dosya_yolu, String açıklama, Kullanıcı iye, Calendar tarih)
+    public Video(String dosya_yolu, String açıklama, Kullanıcı iye,
+            Calendar tarih)
     {
         this.dosya_yolu = dosya_yolu;
         this.açıklama = açıklama;
-        this.iye = iye;
+        this.iye = iye.getKimlikBase64();
         this.tarih = tarih;
         this.KimliğiYenile();
+    }
+    /**
+     * Verilen bilgilerle yeni bir video nesnesi oluşturur.
+     * 
+     * @param dosya_yolu    Temsil edilen video dosyasının adresi
+     * @param açıklama      Kullanıcının video hakkındaki açıklama metni
+     * @param iye           Videonun sahibi olan kullanıcı
+     * @param tarih         Videonun çekildiği tarih ve saat bilgisi
+     * @param kimlik        Base64 metni olarak videonun kimliği
+     */
+    public Video(String dosya_yolu, String açıklama, Kullanıcı iye,
+            Calendar tarih, String kimlik)
+    {
+        this.setDosyaYolu(dosya_yolu);
+        this.setAçıklama(açıklama);
+        this.setİye(iye);
+        this.setTarih(tarih);
+        Base64.Decoder b64decoder = Base64.getDecoder();
+        this.kimlik = b64decoder.decode(kimlik);
+    }
+    /**
+     * Verilen bilgilerle yeni bir video nesnesi oluşturur.
+     * 
+     * @param dosya_yolu    Temsil edilen video dosyasının adresi
+     * @param açıklama      Kullanıcının video hakkındaki açıklama metni
+     * @param iye_base64    Base64 metni olarak videonun sahibinin kimliği
+     * @param tarih         Videonun çekildiği tarih ve saat bilgisi
+     * @param kimlik_base64 Base64 metni olarak videonun kimliği
+     */
+    @JsonCreator
+    public Video(
+            @JsonProperty("DosyaYolu") String dosya_yolu,
+            @JsonProperty("Açıklama") String açıklama,
+            @JsonProperty("İye") String iye_base64,
+            @JsonProperty("Tarih") Calendar tarih,
+            @JsonProperty("_id") String kimlik_base64)
+    {
+        this.setDosyaYolu(dosya_yolu);
+        this.setAçıklama(açıklama);
+        this.setİye(iye);
+        this.setTarih(tarih);
+        Base64.Decoder b64decoder = Base64.getDecoder();
+        this.kimlik = b64decoder.decode(kimlik_base64);
     }
     /**
      * Başka bir video nesnesinin içeriğinden yeni bir video nesnesi oluşturur.
@@ -91,6 +147,7 @@ public class Video implements IKimlikli
      * 
      * @return  Videonun dosya sistemindeki adresi
      */
+    @JsonGetter("DosyaYolu")
     public String getDosyaYolu()
     {
         return this.dosya_yolu;
@@ -111,6 +168,7 @@ public class Video implements IKimlikli
      * 
      * @return  Kullanıcının video hakkındaki açıklama metni
      */
+    @JsonGetter("Açıklama")
     public String getAçıklama()
     {
         return this.açıklama;
@@ -126,32 +184,44 @@ public class Video implements IKimlikli
     }
     
     /**
-     * Videonun sahibini temsil eden Kullanıcı nesnesine erişim sağlar.
+     * Videonun sahibininin kimliğine erişim sağlar.
      * 
-     * @return  Videonun sahibi
-     * @see Kullanıcı
+     * @return  Videonun sahibinin kimliği
+     * @see Kullanıcı#kimlik
      */
-    public Kullanıcı getİye()
+    @JsonGetter("İye")
+    public String getİye()
     {
         return this.iye;
     }
     /**
-     * Videonun sahibini belirtilen yeni Kullanıcı nesnesi olarak değiştirir.
+     * Videonun sahibini belirler.
      * 
      * @param yeni_iye  Videonun yeni sahibi
      * @see Kullanıcı
+     * @see Kullanıcı#getKimlikBase64() 
      */
     public void setİye(Kullanıcı yeni_iye)
     {
-        this.iye = yeni_iye;
+        this.iye = yeni_iye.getKimlikBase64();
+    }
+    /**
+     * Videonun sahibini belirler.
+     * 
+     * @param iye   Videonun yeni sahibi
+     * @see Kullanıcı#kimlik
+     */
+    public void setİye(String iye)
+    {
+        this.iye = iye;
     }
     
-    @Override
+    @Override @JsonIgnore
     public byte[] getKimlikBytes()
     {
         return this.kimlik;
     }
-    @Override
+    @Override @JsonGetter("_id")
     public String getKimlikBase64()
     {
         Base64.Encoder b64encoder = Base64.getEncoder();
@@ -172,6 +242,7 @@ public class Video implements IKimlikli
      * 
      * @return  Videonun çekildiği tarihi bildiren Calendar nesnesinin klonu
      */
+    @JsonGetter("Tarih")
     public Calendar getTarih()
     {
         if (this.tarih == null)

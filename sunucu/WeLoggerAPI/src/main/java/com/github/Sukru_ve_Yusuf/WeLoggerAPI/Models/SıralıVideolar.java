@@ -11,6 +11,8 @@ package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
 import java.util.*;
+import com.fasterxml.jackson.annotation.*;
+import org.bson.Document;
 
 /**
  * Videoları geçmişten geleceğe doğru sıralanmış
@@ -19,6 +21,8 @@ import java.util.*;
  * @see Video
  * @see IÇiftYönlüBağlıListe
  */
+@JsonPropertyOrder({"_id", "DosyaYolu", "Açıklama", "İye", "Tarih",
+    "Önceki", "Sonraki"})
 public class SıralıVideolar extends Video 
         implements IÇiftYönlüBağlıListe<SıralıVideolar>
 {
@@ -31,6 +35,15 @@ public class SıralıVideolar extends Video
      */
     private SıralıVideolar sonraki;
     
+    /**
+     * Verilen kimlikle boş bir sıralı video nesnesi oluşturur.
+     * 
+     * @param kimlik_base64 Base64 metni olarak videonun kimliği
+     */
+    protected SıralıVideolar(String kimlik_base64)
+    {
+        super(kimlik_base64);
+    }
     /**
      * Verilen bilgilerle hiçbir yere bağlı olmayan yepyeni bir video oluşturur.
      * Oluşturulan nesneye yeni bir kimlik atanır.
@@ -48,6 +61,27 @@ public class SıralıVideolar extends Video
         this.sonraki = null;
     }
     /**
+     * Verilen bilgilerle yeni bir sıralı video nesnesi oluşturur.
+     * 
+     * @param dosya_yolu    Temsil edilen video dosyasının adresi
+     * @param açıklama      Kullanıcının video hakkındaki açıklama metni
+     * @param iye_base64    Base64 metni olarak videonun sahibinin kimliği
+     * @param tarih         Videonun çekildiği tarih ve saat bilgisi
+     * @param kimlik_base64 Base64 metni olarak videonun kimliği
+     */
+    @JsonCreator
+    public SıralıVideolar(
+            @JsonProperty("DosyaYolu") String dosya_yolu,
+            @JsonProperty("Açıklama") String açıklama,
+            @JsonProperty("İye") String iye_base64,
+            @JsonProperty("Tarih") Calendar tarih,
+            @JsonProperty("_id") String kimlik_base64)
+    {
+        super(dosya_yolu, açıklama, iye_base64, tarih, kimlik_base64);
+        this.önceki = null;
+        this.sonraki = null;
+    }
+    /**
      * Bir video nesnesinin içeriğinden yeni bir sıralı video nesnesi oluşturur.
      * İsteğe bağlı olarak kimlik korunabilir ya da yenilenebilir.
      * 
@@ -60,6 +94,28 @@ public class SıralıVideolar extends Video
         super(kaynak_video, kimlik_yenilensin);
         this.önceki = null;
         this.sonraki = null;
+    }
+    
+    public static SıralıVideolar BSONBelgesinden(Document belge)
+    {
+        String kimlik = belge.getString("_id");
+        if (belge.containsKey("DosyaYolu") && belge.containsKey("İye")
+                && belge.containsKey("Tarih") && !kimlik.isBlank())
+        {
+            SıralıVideolar videolar = new SıralıVideolar(
+                    belge.getString("DosyaYolu"),
+                    belge.getString("Açıklama"),
+                    belge.getString("İye"),
+                    new Calendar.Builder()
+                            .setInstant(belge.get("Tarih", Long.class))
+                            .build(),
+                    belge.getString("_id"));
+            return videolar;
+        }
+        else
+        {
+            return null;
+        }
     }
     
     /**
@@ -177,9 +233,24 @@ public class SıralıVideolar extends Video
      * 
      * @return  Bir geçmişteki videonun sıralı video nesnesi
      */
+    @JsonIgnore
     public SıralıVideolar getÖnceki()
     {
         return this.önceki;
+    }
+    /**
+     * Bir geçmişteki videonun kimliğini bildirir.
+     * 
+     * @return  Bir geçmişte video varsa Base64 metni olarak kimliği,
+     *          geçmişte video yoksa null
+     */
+    @JsonGetter("Önceki")
+    public String getÖncekininKimliği()
+    {
+        if (this.önceki != null)
+            return this.önceki.getKimlikBase64();
+        else
+            return null;
     }
     /**
      * Belirtilen videoyu bir geçmişteki video olarak tanımlar.
@@ -189,6 +260,7 @@ public class SıralıVideolar extends Video
      * @param önceki    Bir geçmişe yerleştirilecek video
      * @return  İşlem başarılıysa true, başarısızsa false
      */
+    @JsonIgnore
     public boolean setÖnceki(SıralıVideolar önceki)
     {
         if (önceki == null)
@@ -217,9 +289,24 @@ public class SıralıVideolar extends Video
      * 
      * @return  Bir gelecekteki videonun sıralı video nesnesi
      */
+    @JsonIgnore
     public SıralıVideolar getSonraki()
     {
         return this.sonraki;
+    }
+    /**
+     * Bir gelecekteki videonun kimliğini bildirir.
+     * 
+     * @return  Bir gelecekte video varsa Base64 metni olarak kimliği,
+     *          gelecekte video yoksa null
+     */
+    @JsonGetter("Sonraki")
+    public String getSonrakininKimliği()
+    {
+        if (this.sonraki != null)
+            return this.sonraki.getKimlikBase64();
+        else
+            return null;
     }
     /**
      * Belirtilen videoyu bir gelecekteki video olarak tanımlar.
@@ -229,6 +316,7 @@ public class SıralıVideolar extends Video
      * @param sonraki    Bir geleceğe yerleştirilecek video
      * @return  İşlem başarılıysa true, başarısızsa false
      */
+    @JsonIgnore
     public boolean setSonraki(SıralıVideolar sonraki)
     {
         if (sonraki == null)

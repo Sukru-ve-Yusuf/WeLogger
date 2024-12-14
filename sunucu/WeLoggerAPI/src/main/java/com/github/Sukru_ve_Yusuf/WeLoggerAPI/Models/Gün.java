@@ -139,7 +139,7 @@ public class Gün implements IKimlikli
         Calendar video_günü = videolar.getTarih();
         boolean aynı_günde = (bu_gün.get(Calendar.YEAR) == video_günü.get(Calendar.YEAR))
                 && (bu_gün.get(Calendar.DAY_OF_YEAR) == video_günü.get(Calendar.DAY_OF_YEAR));
-        boolean aynı_iye = this.getBaşkahraman().getKimlikBase64() == videolar.getİye().getKimlikBase64();
+        boolean aynı_iye = this.getBaşkahraman().getKimlikBase64() == videolar.getİye();
         if (aynı_günde && aynı_iye)
         {
             this.videolar = videolar;
