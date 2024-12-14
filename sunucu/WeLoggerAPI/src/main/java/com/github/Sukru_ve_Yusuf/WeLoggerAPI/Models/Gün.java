@@ -12,37 +12,41 @@ package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
 import java.util.*;
 import java.security.SecureRandom;
+import com.fasterxml.jackson.annotation.*;
 
 /**
  * Aynı kişinin aynı günde çektiği videoları bir araya getiren sınıf.
  * 
  * @see Video
+ * @see Kullanıcı
  * @see IKimlikli
  */
+@JsonPropertyOrder({"_id", "Başkahraman", "Açıklama", "Videolar", "Tarih"})
 public class Gün implements IKimlikli
 {
     /**
      * Bu günü yaşamış kişi.
-     * @see Kullanıcı
+     * @see Kullanıcı#getKimlikBase64() 
+     * @see Kullanıcı#kimlik
      */
-    private Kullanıcı başkahraman;
+    protected String başkahraman;
     /**
      * Başkahramanın bu gün hakkında yazdığı yorum ve açıklama metni.
      */
-    private String açıklama;
+    protected String açıklama;
     /**
      * Başkahramanın bu gün çektiği videoların tarihsel sıralı bağlı listesi.
      */
-    private SıralıVideolar videolar;
+    protected SıralıVideolar videolar;
     /**
      * Bu günün tarihi.
      * @see Calendar
      */
-    private Calendar tarih;
+    protected Calendar tarih;
     /**
      * Bu günü diğer günlerden ayıran eşsiz bir sayı.
      */
-    private byte[] kimlik;
+    protected byte[] kimlik;
     
     /**
      * Verilen bilgilerle yeni bir Gün nesnesi oluşturur.
@@ -60,7 +64,7 @@ public class Gün implements IKimlikli
     public Gün(Kullanıcı başkahraman, String açıklama, SıralıVideolar videolar,
             Calendar tarih)
     {
-        this.başkahraman = başkahraman;
+        this.başkahraman = başkahraman.getKimlikBase64();
         this.setAçıklama(açıklama);
         this.setVideolar(videolar);
         this.setTarih(tarih);
@@ -85,14 +89,39 @@ public class Gün implements IKimlikli
         else
             this.kimlik = başka_gün.getKimlikBytes().clone();
     }
+    /**
+     * Verilen bilgilerle videosu olmayan bir gün oluşturur.
+     * 
+     * @param başkahraman   Günü yaşayan kullanıcının kimliği
+     * @param açıklama      Gün hakkında açıklama metni
+     * @param tarih         Günün tarihi
+     * @param kimlik        Base64 metni olarak günün kimliği
+     */
+    @JsonCreator
+    public Gün(
+            @JsonProperty("Başkahraman") String başkahraman,
+            @JsonProperty("Açıklama") String açıklama,
+            @JsonProperty("Tarih") Calendar tarih,
+            @JsonProperty("_id") String kimlik)
+    {
+        this.başkahraman = başkahraman;
+        this.setAçıklama(açıklama);
+        this.setTarih(tarih);
+        this.setVideolar(null);
+        Base64.Decoder b64decoder = Base64.getDecoder();
+        this.kimlik = b64decoder.decode(kimlik);
+    }
     
     /**
-     * Günün başkahramanını temsil eden Kullanıcı nesnesine erişim sağlar.
+     * Günün başkahramanınının kullanıcı kimliğine erişim sağlar.
      * 
-     * @return  Günün başkahramanı
+     * @return  Günün başkahramanının kimliği
+     * @see Kullanıcı#getKimlikBase64() 
+     * @see Kullanıcı#kimlik
      * @see Kullanıcı
      */
-    public Kullanıcı getBaşkahraman()
+    @JsonGetter("Başkahraman")
+    public String getBaşkahraman()
     {
         return this.başkahraman;
     }
@@ -102,6 +131,7 @@ public class Gün implements IKimlikli
      * 
      * @return  Başkahramanın bu gün hakkındaki açıklaması
      */
+    @JsonGetter("Açıklama")
     public String getAçıklama()
     {
         return this.açıklama;
@@ -121,9 +151,23 @@ public class Gün implements IKimlikli
      * 
      * @return  Gün içinde çekilmiş videoların sıralı bağlı listesi
      */
+    @JsonIgnore
     public SıralıVideolar getVideolar()
     {
         return this.videolar;
+    }
+    /**
+     * Bu gün içinde çekilmiş videolardan birinin kimliğine erişim sağlar.
+     * 
+     * @return  Base64 metni olarak, gün içinde çekilmiş videolardan birinin
+     *          kimliği. Video yoksa null.
+     */
+    @JsonGetter("Videolar")
+    public String getVideolarınKimliği()
+    {
+        if (this.videolar == null)
+            return null;
+        return this.videolar.getKimlikBase64();
     }
     /**
      * Bu gün içinde çekilmiş videoların listesini tanımlar.
@@ -133,13 +177,14 @@ public class Gün implements IKimlikli
      * @param videolar  Bu gün içinde çekilmiş videoların sıralı listesi
      * @return  Video listesi yenilenirse true, yenilenmezse false
      */
+    @JsonIgnore
     public boolean setVideolar(SıralıVideolar videolar)
     {
         Calendar bu_gün = this.getTarih();
         Calendar video_günü = videolar.getTarih();
         boolean aynı_günde = (bu_gün.get(Calendar.YEAR) == video_günü.get(Calendar.YEAR))
                 && (bu_gün.get(Calendar.DAY_OF_YEAR) == video_günü.get(Calendar.DAY_OF_YEAR));
-        boolean aynı_iye = this.getBaşkahraman().getKimlikBase64() == videolar.getİye();
+        boolean aynı_iye = this.getBaşkahraman() == videolar.getİye();
         if (aynı_günde && aynı_iye)
         {
             this.videolar = videolar;
@@ -153,6 +198,7 @@ public class Gün implements IKimlikli
      * 
      * @return  Günün tarihini belirten Calendar nesnesinin klonu
      */
+    @JsonGetter("Tarih")
     public Calendar getTarih()
     {
         return (Calendar)this.tarih.clone();
@@ -174,12 +220,12 @@ public class Gün implements IKimlikli
         return false;
     }
     
-    @Override
+    @Override @JsonIgnore
     public byte[] getKimlikBytes()
     {
         return this.kimlik;
     }
-    @Override
+    @Override @JsonGetter("_id")
     public String getKimlikBase64()
     {
         Base64.Encoder b64encoder = Base64.getEncoder();
@@ -188,7 +234,7 @@ public class Gün implements IKimlikli
     /**
      * Bu gün için yepyeni bir kimlik atar.
      */
-    private void KimliğiYenile()
+    protected void KimliğiYenile()
     {
         SecureRandom rast = new SecureRandom();
         this.kimlik = new byte[32];

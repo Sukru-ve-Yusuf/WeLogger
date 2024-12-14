@@ -11,6 +11,8 @@ package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
 import java.util.*;
+import org.bson.Document;
+import com.fasterxml.jackson.annotation.*;
 
 /**
  * Günleri tarihsel olarak geçmişten geleceğe doğru
@@ -19,6 +21,8 @@ import java.util.*;
  * @see Gün
  * @see IÇiftYönlüBağlıListe
  */
+@JsonPropertyOrder({"_id", "Başkahraman", "Açıklama", "Videolar", "Tarih", 
+    "Önceki", "Sonraki"})
 public class SıralıGünler extends Gün
         implements IÇiftYönlüBağlıListe<SıralıGünler>
 {
@@ -68,6 +72,63 @@ public class SıralıGünler extends Gün
         this.setÖnceki(null);
         this.setSonraki(null);
     }
+    /**
+     * Verilen bilgilerle videosu olmayan bir gün oluşturur.
+     * Geçmiş ve gelecek boş bırakılır.
+     * 
+     * @param başkahraman   Günü yaşayan kullanıcının kimliği
+     * @param açıklama      Gün hakkında açıklama metni
+     * @param tarih         Günün tarihi
+     * @param kimlik        Base64 metni olarak günün kimliği
+     */
+    @JsonCreator
+    public SıralıGünler(
+            @JsonProperty("Başkahraman") String başkahraman,
+            @JsonProperty("Açıklama") String açıklama,
+            @JsonProperty("Tarih") Calendar tarih,
+            @JsonProperty("_id") String kimlik)
+    {
+        super(başkahraman, açıklama, tarih, kimlik);
+        this.setÖnceki(null);
+        this.setSonraki(null);
+    }
+    
+    /**
+     * Veri tabanı sorgusuyla elde edilmiş Document türündeki BSON belgesinin
+     * içeriğini kullanarak yeni bir sıralı gün nesnesi oluşturur.
+     * Günün videoları ile geçmiş ve gelecek günler boş bırakılır.
+     * 
+     * @param belge Veri tabanından okunmuş Document türünde BSON belgesi
+     * @return  Belgede doğru alanlar varsa yeni sıralı gün nesnesi,
+     *          yoksa null
+     * 
+     * @see Document
+     * @see com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanıHizmetleri
+     * @see com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı
+     */
+    public static SıralıGünler BSONBelgesinden(Document belge)
+    {
+        String kimlik = belge.getString("_id");
+        if (kimlik == null)
+            return null;
+        if (belge.containsKey("Başkahraman") && belge.containsKey("Tarih")
+                && belge.containsKey("Videolar")  && !kimlik.isBlank())
+        {
+            SıralıGünler günler = new SıralıGünler(
+                    belge.getString("Başkahraman"),
+                    belge.getString("Açıklama"),
+                    new Calendar.Builder()
+                        .setInstant(belge.get("Tarih", Long.class))
+                        .build(),
+                    belge.getString("_id"));
+            return günler;
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
     /**
      * Sıralı gün listesinin tarihsel sıraya uygun bir noktasına
      * yeni video ekler.
@@ -181,9 +242,22 @@ public class SıralıGünler extends Gün
      * 
      * @return  Listede bir geçmişteki günün sıralı gün nesnesi
      */
+    @JsonIgnore
     public SıralıGünler getÖnceki()
     {
         return this.önceki;
+    }
+    /**
+     * Bir geçmişteki günün kimliğine Base64 metni olarak erişim sağlar.
+     * 
+     * @return  Base64 metni olarak bir geçmiteki günün kimliği
+     */
+    @JsonGetter("Önceki")
+    public String getÖncekininKimliği()
+    {
+        if (this.önceki == null)
+            return null;
+        return this.önceki.getKimlikBase64();
     }
     /**
      * Belirtilen günü bir gelecekteki gün olarak tanımlar.
@@ -193,6 +267,7 @@ public class SıralıGünler extends Gün
      * @param yeni_önceki   Bir geleceğe yerleştirilecek gün
      * @return  İşlem başarılıysa true, başarısızsa false
      */
+    @JsonIgnore
     public boolean setÖnceki(SıralıGünler yeni_önceki)
     {
         if (yeni_önceki == null)
@@ -222,9 +297,22 @@ public class SıralıGünler extends Gün
      * 
      * @return  Listede bir gelecekteki günün sıralı gün nesnesi
      */
+    @JsonIgnore
     public SıralıGünler getSonraki()
     {
         return this.sonraki;
+    }
+    /**
+     * Bir gelecekteki günün kimliğine Base64 metni olarak erişim sağlar.
+     * 
+     * @return  Base64 metni olarak bir gelecekteki günün kimliği
+     */
+    @JsonGetter("Sonraki")
+    public String getSonrakininKimliği()
+    {
+        if (this.sonraki == null)
+            return null;
+        return this.sonraki.getKimlikBase64();
     }
     /**
      * Belirtilen günü bir gelecekteki gün olarak tanımlar.
@@ -234,6 +322,7 @@ public class SıralıGünler extends Gün
      * @param yeni_sonraki  Bir geleceğe yerleştirilecek gün
      * @return  İşlem başarılıysa true, başarısızsa false
      */
+    @JsonIgnore
     public boolean setSonraki(SıralıGünler yeni_sonraki)
     {
         if (yeni_sonraki == null)

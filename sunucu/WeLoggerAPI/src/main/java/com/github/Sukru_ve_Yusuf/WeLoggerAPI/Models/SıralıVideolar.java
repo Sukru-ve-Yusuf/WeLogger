@@ -96,9 +96,24 @@ public class SıralıVideolar extends Video
         this.sonraki = null;
     }
     
+    /**
+     * Veri tabanı sorgusuyla elde edilmiş Document türündeki BSON belgesinin
+     * içeriğini kullanarak yeni bir sıralı video nesnesi oluşturur.
+     * Geçmiş ve gelecek boş bırakılır.
+     * 
+     * @param belge Veri tabanından okunmuş Document türünde BSON belgesi
+     * @return  Belgede doğru alanlar varsa yeni sıralı video nesnesi,
+     *          yoksa null
+     * 
+     * @see Document
+     * @see com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanıHizmetleri
+     * @see com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı
+     */
     public static SıralıVideolar BSONBelgesinden(Document belge)
     {
         String kimlik = belge.getString("_id");
+        if (kimlik == null)
+            return null;
         if (belge.containsKey("DosyaYolu") && belge.containsKey("İye")
                 && belge.containsKey("Tarih") && !kimlik.isBlank())
         {

@@ -33,13 +33,28 @@ public class VeriTabanıHizmetleri
      */
     private String veri_tabanı_adı;
     /**
-     * Veri tabanındaki videolara erişim sağlayan hizmet
+     * Veri tabanındaki videolara erişim sağlayan hizmet.
      * 
      * @see VideoVT
      * @see SıralıVideolar
      * @see Video
      */
     private VideoVT video_vt;
+    /**
+     * Veri tabanındaki günlere erişim sağlayan hizmet.
+     * 
+     * @see GünVT
+     * @see SıralıGünler
+     * @see Gün
+     */
+    private GünVT gün_vt;
+    /**
+     * Veri tabanınındaki kullanıcı bilgilerine erişim sağlayan hizmet.
+     * 
+     * @see KullanıcıVT
+     * @see Kullanıcı
+     */
+    private KullanıcıVT kullanıcı_vt;
     
     /**
      * Veri tabanı hizmetlerini başlatıp bir araya getirir.
@@ -70,6 +85,16 @@ public class VeriTabanıHizmetleri
         if (video_vthizmeti == null)
             return null;
         hizmetler.video_vt = video_vthizmeti;
+        
+        GünVT gün_hizmeti = GünVT.Başlat(hizmetler);
+        if (gün_hizmeti == null)
+            return null;
+        hizmetler.gün_vt = gün_hizmeti;
+        
+        KullanıcıVT kullanıcı_hizmeti = KullanıcıVT.Başlat(hizmetler);
+        if (kullanıcı_hizmeti == null)
+            return null;
+        hizmetler.kullanıcı_vt = kullanıcı_hizmeti;
         
         return hizmetler;
     }
@@ -102,5 +127,26 @@ public class VeriTabanıHizmetleri
     public VideoVT getVideoVT()
     {
         return this.video_vt;
+    }
+    /**
+     * Veri tabanındaki günlere erişim sağlayan hizmete erişim sağlar.
+     * 
+     * @return  Gün veri tabanı hizmeti
+     * @see GünVT
+     */
+    public GünVT getGünVT()
+    {
+        return this.gün_vt;
+    }
+    /**
+     * Veri tabanındaki kullanıcı bilgilerine erişim sağlayan hizmete
+     * erişim sağlar.
+     * 
+     * @return  Kullanıcı veri tabanı hizmeti
+     * @see KullanıcıVT
+     */
+    public KullanıcıVT getKullanıcıVT()
+    {
+        return this.kullanıcı_vt;
     }
 }

@@ -12,10 +12,13 @@ package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
 import java.util.*;
 import java.security.SecureRandom;
+import org.bson.Document;
+import com.fasterxml.jackson.annotation.*;
 
 /**
  * Üye olan her bir kullanıcıyı temsil eden sınıf.
  */
+@JsonPropertyOrder({"_id", "Ad", "KullanıcıAdı", "Parola", "Ömür"})
 public class Kullanıcı implements IKimlikli
 {
     /**
@@ -57,12 +60,68 @@ public class Kullanıcı implements IKimlikli
     {
         this.kimlik = kimlik.clone();
     }
+    /**
+     * Verilen bilgilerle ömrü olmayan bir kullanıcı oluşturur.
+     * 
+     * @param kimlik        Base64 metni olarak kullanıcının kimliği
+     * @param ad            Kullanıcının gerçek adı,
+     * @param kullanıcı_adı Kullanıcının rumuzu
+     * @param parola        Kullanıcının karılmış parolası
+     */
+    @JsonCreator
+    public Kullanıcı(
+            @JsonProperty("_id") String kimlik,
+            @JsonProperty("Ad") String ad,
+            @JsonProperty("KullanıcıAdı") String kullanıcı_adı,
+            @JsonProperty("Parola") String parola)
+    {
+        Base64.Decoder b64decoder = Base64.getDecoder();
+        this.kimlik = b64decoder.decode(kimlik);
+        this.setAd(ad);
+        this.setKullanıcıAdı(kullanıcı_adı);
+        this.parola = parola;
+        this.ömür = null;
+    }
+    /**
+     * Veri tabanı sorgusuyla elde edilmiş Document türündeki BSON belgesinin
+     * içeriğini kullanarak yeni bir kullanıcı nesnesi oluşturur.
+     * Ömür boş bırakılır.
+     * 
+     * @param belge Veri tabanından okunmuş Document türünde BSON belgesi
+     * @return  Belgede doğru alanlar varsa yeni kullanıcı nesnesi,
+     *          yoksa null
+     * 
+     * @see Document
+     * @see com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanıHizmetleri
+     * @see com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı
+     */
+    public static Kullanıcı BSONBelgesinden(Document belge)
+    {
+        String kimlik = belge.getString("_id");
+        if (kimlik == null)
+            return null;
+        if (belge.containsKey("KullanıcıAdı") && belge.containsKey("Parola")
+                && belge.containsKey("Ömür") && !kimlik.isBlank())
+        {
+            Kullanıcı kullanıcı = new Kullanıcı(
+                    belge.getString("_id"),
+                    belge.getString("Ad"),
+                    belge.getString("KullanıcıAdı"),
+                    belge.getString("Parola"));
+            return kullanıcı;
+        }
+        else
+        {
+            return null;
+        }
+    }
     
     /**
      * Kullanıcının gerçek adına erişim sağlar.
      * 
      * @return  Kullanıcının gerçek adı
      */
+    @JsonGetter("Ad")
     public String getAd()
     {
         return this.ad;
@@ -82,6 +141,7 @@ public class Kullanıcı implements IKimlikli
      * 
      * @return  Kullanıcının rumuzu
      */
+    @JsonGetter("KullanıcıAdı")
     public String getKullanıcıAdı()
     {
         return this.kullanıcı_adı;
@@ -100,13 +160,38 @@ public class Kullanıcı implements IKimlikli
     }
     
     /**
+     * Kullanıcının parolasının karılmış biçimine erişim sağlar.
+     * 
+     * @return  Kullanıcının karılmış parolası
+     */
+    @JsonGetter("Parola")
+    public String getParola()
+    {
+        return this.parola;
+    }
+    
+    /**
      * Bu kullanıcının başkahraman olduğu günlere erişim sağlar.
      * 
      * @return  Kullanıcının başkahraman olduğu günlerin sıralı bağlı listesi
      */
+    @JsonIgnore
     public SıralıGünler getÖmür()
     {
         return this.ömür;
+    }
+    /**
+     * Bu kullanıcının başkahraman olduğu günlerden birinin kimliğine
+     * erişim sağlar.
+     * 
+     * @return  Kullanıcının başkahraman olduğu günlerden birinin kimliği
+     */
+    @JsonGetter("Ömür")
+    public String getÖmrünKimliği()
+    {
+        if (this.ömür == null)
+            return null;
+        return this.ömür.getKimlikBase64();
     }
     /**
      * Bu kullanıcının başkahraman olduğu günlerin listesini tanımlar.
@@ -115,12 +200,12 @@ public class Kullanıcı implements IKimlikli
      * @param ömür  Bu kullanıcının başkahraman olduğu günlerin sıralı listesi
      * @return  Ömür yenilenirse true, yenilenmezse false
      */
+    @JsonIgnore
     public boolean setÖmür(SıralıGünler ömür)
     {
         Kullanıcı bu_kişi = this;
-        Kullanıcı kahraman = ömür.getBaşkahraman();
         
-        if (bu_kişi.getKimlikBase64() == kahraman.getKimlikBase64())
+        if (bu_kişi.getKimlikBase64() == ömür.getBaşkahraman())
         {
             this.ömür = ömür;
             return true;
@@ -129,12 +214,12 @@ public class Kullanıcı implements IKimlikli
     }
     
     
-    @Override
+    @Override @JsonIgnore
     public byte[] getKimlikBytes()
     {
         return this.kimlik;
     }
-    @Override
+    @Override @JsonGetter("_id")
     public String getKimlikBase64()
     {
         Base64.Encoder b64encoder = Base64.getEncoder();

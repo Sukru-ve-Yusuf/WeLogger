@@ -1,5 +1,5 @@
 /*
- * VideoVT
+ * GünVT
  * 
  * Sürüm 0.1
  * 
@@ -23,50 +23,49 @@ import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import com.mongodb.client.result.*;
 import static com.mongodb.client.model.Filters.*;
-
 /**
- * Videoların veri tabanı sorguları için bir hizmet sınıfı.
+ * Günlerin veri tabanı işlemleri için bir hizmet sınıfı.
  */
-public class VideoVT
+public class GünVT
 {
     /**
      * Uygulamada yer alan veri tabanı hizmetlerine erişim sağlar.
      */
     private VeriTabanıHizmetleri VT;
-    private final String KoleksiyonAdı = "video";
+    private final String KoleksiyonAdı = "gün";
     
     /**
      * Yanlış oluşturmayı önlemek için gizli başlatıcı.
      */
-    private VideoVT() {}
+    private GünVT() {}
     
     /**
-     * Belirtilen veri tabanı hizmetleriyle bağlı yeni video veri tabanı
+     * Belirtilen veri tabanı hizmetlerine bağlı yeni gün veri tabanı
      * hizmeti başlatır.
      * 
      * @param vt_hizmetleri Uygulamada kullanılan veri tabanı hizmetleri
-     * @return  Yeni video veritabanı hizmeti
+     * @return  Yeni gün veri tabanı hizmeti
      * 
      * @see VeriTabanıHizmetleri
      */
-    public static VideoVT Başlat(VeriTabanıHizmetleri vt_hizmetleri)
+    public static GünVT Başlat(VeriTabanıHizmetleri vt_hizmetleri)
     {
         if (vt_hizmetleri == null)
             return null;
         
-        VideoVT video_vt = new VideoVT();
-        video_vt.VT = vt_hizmetleri;
-        return video_vt;
+        GünVT gün_vt = new GünVT();
+        gün_vt.VT = vt_hizmetleri;
+        return gün_vt;
     }
     
     /**
-     * Verilen videoyu, geçmişini ve geleceğini pek umursamadan, tek başına
+     * Verilen günü, geçmişini ve geleceğini pek umursamadan, tek başına
      * veri tabanına kaydeder.
      * 
-     * @param eklenecek Veri tabanına kaydedilecek video
+     * @param eklenecek Veri tabanına kaydedilecek gün
      * @return  Kayıt başarılı olursa true, başarısız olursa false
      */
-    public boolean TekVideoEkle(SıralıVideolar eklenecek)
+    public boolean TekGünEkle(SıralıGünler eklenecek)
     {
         if (eklenecek == null)
             return false;
@@ -101,15 +100,16 @@ public class VideoVT
             return false;
         }
     }
+    
     /**
-     * Kimliği belirtilen videoyu veri tabanından getirir.
-     * Öncesi ve sonraki boş bırakılır.
+     * Kimliği belirtilen günü veri tabanından getirir.
+     * Öncesi ve sonrası boş bırakılır.
      * 
-     * @param kimlik    Base64 metni olarak, istenen videonun kimliği
-     * @return  Geçmişi ve geleceği olmadan, kimliği verilen video.
-     *          Video bulunamazsa null.
+     * @param kimlik    Base64 metni olarak, istenen günün kimliği
+     * @return  Geçmişi ve geleceği olmadan, kimliği verilen gün.
+     *          Gün bulunamazsa null.
      */
-    public SıralıVideolar TekVideoOku(String kimlik)
+    public SıralıGünler TekGünOku(String kimlik)
     {
         if (kimlik == null)
             return null;
@@ -127,7 +127,12 @@ public class VideoVT
             }
             else
             {
-                SıralıVideolar bulunan = SıralıVideolar.BSONBelgesinden(sonuç);
+                SıralıGünler bulunan = SıralıGünler.BSONBelgesinden(sonuç);
+                if (sonuç.getString("Videolar") != null)
+                {
+                    bulunan.setVideolar(VT.getVideoVT()
+                            .VideolarıOku(sonuç.getString("Videolar")));
+                }
                 return bulunan;
             }
         }
@@ -137,20 +142,19 @@ public class VideoVT
             return null;
         }
     }
-    
     /**
-     * Kimliği belirtilen videoyu geçmişi ve geleceğiyle birlikte
-     * veri tabanından getirir.
+     * Kimliği belirtilen günü geçmişi ve geleceğiyle birlikte
+     * veri tabanınından getirir.
      * 
-     * @param kimlik    Base64 metni olarak, istenen videonun kimliği
-     * @return  Geçmişi ve geleceğiyle birlikte, kimliği verilen video.
-     *          Video bulunamazsa null.
+     * @param kimlik    Base64 metni olarak, istenen günün kimliği
+     * @return  Geçmişi ve geleceğiyle birlikte, kimliği verilen gün.
+     *          Gün bulunamazsa null.
      */
-    public SıralıVideolar VideolarıOku(String kimlik)
+    public SıralıGünler GünleriOku(String kimlik)
     {
         if (kimlik == null)
             return null;
-        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        try(MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
         {
             MongoDatabase veri_tabanı = istemci.getDatabase(
                     VT.getVeriTabanıAdı());
@@ -162,7 +166,9 @@ public class VideoVT
             {
                 return null;
             }
-            SıralıVideolar videolar = SıralıVideolar.BSONBelgesinden(sonuç);
+            SıralıGünler günler = SıralıGünler.BSONBelgesinden(sonuç);
+            günler.setVideolar(VT.getVideoVT()
+                    .VideolarıOku(sonuç.getString("Videolar")));
             
             String önceki_kimlik = sonuç.getString("Önceki");
             if (önceki_kimlik != null && !önceki_kimlik.isBlank())
@@ -172,9 +178,10 @@ public class VideoVT
                         .first();
                 if (önceki != null)
                 {
-                    SıralıVideolar övid = SıralıVideolar
-                            .BSONBelgesinden(önceki);
-                    videolar.DüğümEkle(övid);
+                    SıralıGünler ögün = SıralıGünler.BSONBelgesinden(önceki);
+                    ögün.setVideolar(VT.getVideoVT()
+                            .VideolarıOku(önceki.getString("Videolar")));
+                    günler.DüğümEkle(ögün);
                     önceki_kimlik = önceki.getString("Önceki");
                     while (önceki_kimlik != null && !önceki_kimlik.isBlank())
                     {
@@ -183,8 +190,10 @@ public class VideoVT
                                 .first();
                         if (önceki == null)
                             break;
-                        övid = SıralıVideolar.BSONBelgesinden(önceki);
-                        videolar.DüğümEkle(övid);
+                        ögün = SıralıGünler.BSONBelgesinden(önceki);
+                        ögün.setVideolar(VT.getVideoVT()
+                                .VideolarıOku(önceki.getString("Videolar")));
+                        günler.DüğümEkle(ögün);
                         önceki_kimlik = önceki.getString("Önceki");
                     }
                 }
@@ -198,9 +207,10 @@ public class VideoVT
                         .first();
                 if (sonraki != null)
                 {
-                    SıralıVideolar svid = SıralıVideolar
-                            .BSONBelgesinden(sonraki);
-                    videolar.DüğümEkle(svid);
+                    SıralıGünler sgün = SıralıGünler.BSONBelgesinden(sonraki);
+                    sgün.setVideolar(VT.getVideoVT()
+                            .VideolarıOku(sonraki.getString("Videolar")));
+                    günler.DüğümEkle(sgün);
                     sonraki_kimlik = sonraki.getString("Sonraki");
                     while (sonraki_kimlik != null && !sonraki_kimlik.isBlank())
                     {
@@ -209,13 +219,15 @@ public class VideoVT
                                 .first();
                         if (sonraki == null)
                             break;
-                        svid = SıralıVideolar.BSONBelgesinden(sonraki);
-                        videolar.DüğümEkle(svid);
+                        sgün = SıralıGünler.BSONBelgesinden(sonraki);
+                        sgün.setVideolar(VT.getVideoVT()
+                                .VideolarıOku(sonraki.getString("Videolar")));
+                        günler.DüğümEkle(sgün);
                         sonraki_kimlik = sonraki.getString("Sonraki");
                     }
                 }
             }
-            return videolar;
+            return günler;
             
         }
         catch (Exception e)
