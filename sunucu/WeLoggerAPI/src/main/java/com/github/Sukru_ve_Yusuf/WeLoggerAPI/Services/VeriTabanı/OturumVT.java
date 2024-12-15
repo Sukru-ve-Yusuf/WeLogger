@@ -13,6 +13,7 @@ import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.*;
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models.*;
 
 import java.util.*;
+import java.lang.*;
 import org.bson.*;
 import org.bson.types.*;
 import org.bson.conversions.Bson;
@@ -23,6 +24,7 @@ import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import com.mongodb.client.result.*;
 import static com.mongodb.client.model.Filters.*;
+import com.mongodb.client.model.*;
 
 /**
  * Oturumların veri tabanı sorguları için bir hizmet sınıfı.
@@ -107,7 +109,7 @@ public class OturumVT
      * 
      * @param kimlik    Denetlenen oturumun kimliği
      * @param kullanıcı Denetlenen oturumun kullanıcısı
-     * @return  Oturum açıksa 1, bitmişse 0, henüz başlamamışsa 2,
+     * @return  Oturum açıksa 1, bitmişse ya da yoksa 0, henüz başlamamışsa 2,
      *          hata olursa -1
      */
     public byte OturumAçık(String kimlik, String kullanıcı)
@@ -132,17 +134,21 @@ public class OturumVT
                 if (oturum == null)
                     return 0;
 
-                long baş = oturum.get("Baş", long.class);
+                Long baş = oturum.getLong("Baş");
+                if (baş == null)
+                    return 0;
                 Calendar başlangıç = new Calendar.Builder()
                         .setInstant(baş).build();
                 
-                long son = oturum.get("Son", long.class);
+                Long son = oturum.getLong("Son");
+                if (son == null)
+                    return 0;
                 Calendar bitiş = new Calendar.Builder()
                         .setInstant(son).build();
 
                 Calendar şimdi = Calendar.getInstance();
                 
-                if (başlangıç.after(bitiş))
+                if (baş > son)
                     return -1;
                 
                 if (şimdi.before(başlangıç))
@@ -162,6 +168,88 @@ public class OturumVT
         catch (Exception e)
         {
             return -1;
+        }
+    }
+    /**
+     * Belirtilen oturumu veri tabanına kaydeder.
+     * 
+     * @param yeni_oturum   Kaydedilecek oturum
+     * @return  Kayıt başarılı olursa true, olmazsa false
+     */
+    public boolean OturumKaydet(Oturum yeni_oturum)
+    {
+        if (yeni_oturum == null)
+            return false;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            try
+            {
+                ObjectMapper haritacı = new ObjectMapper();
+                String eklenecek_json = haritacı
+                        .writeValueAsString(yeni_oturum);
+                Document eklenecek_doc = Document.parse(eklenecek_json);
+                if (eklenecek_doc == null)
+                {
+                    return false;
+                }
+                InsertOneResult ekleme = koleksiyon.insertOne(eklenecek_doc);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+    /**
+     * Kimliği ve kullanıcısı belirtilen oturumu kapatır.
+     * 
+     * @param oturum_kimliği    Kapanacak oturumun kimliği
+     * @param kullanıcı_kimliği Kapanacak oturumun kullanıcısının kimliği
+     * @return  Kapatma başarılı olursa true, başarısız olursa false
+     */
+    public boolean OturumKapat(String oturum_kimliği, String kullanıcı_kimliği)
+    {
+        if (oturum_kimliği == null || oturum_kimliği.isBlank())
+            return false;
+        if (kullanıcı_kimliği == null || kullanıcı_kimliği.isBlank())
+            return false;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı
+                    .getCollection(this.KoleksiyonAdı);
+            
+            Bson sorgu = and(eq("_id", oturum_kimliği),
+                    eq("Kullanıcı", kullanıcı_kimliği));
+            Calendar şimdi = Calendar.getInstance();
+            Bson güncelleme = Updates.set("Son", şimdi.getTimeInMillis());
+            
+            try
+            {
+                UpdateResult sonuç = koleksiyon.updateOne(sorgu, güncelleme);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
         }
     }
 }

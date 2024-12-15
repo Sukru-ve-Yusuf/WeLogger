@@ -155,9 +155,13 @@ public class ÜyelikDenetçisi
                 
                 ObjectMapper haritacı = new ObjectMapper();
                 String oturum_json = haritacı.writeValueAsString(yeni_oturum);
-                Response yanıt = Response.status(200).entity(oturum_json)
-                        .type("application/json").build();
-                return yanıt;
+                boolean kaydedildi = oturum_vt.OturumKaydet(yeni_oturum);
+                if (kaydedildi)
+                {
+                    Response yanıt = Response.status(200).entity(oturum_json)
+                            .type("application/json").build();
+                    return yanıt;
+                }
             }
             return Response.status(403).build(); // Forbidden
         }
@@ -165,5 +169,50 @@ public class ÜyelikDenetçisi
         {
             return Response.status(500).build();
         }
+    }
+    /**
+     * İstek başlığında belirtilen oturumu geçersiz duruma getirir.
+     * 
+     * @param oturum    Oturum kimliği (Header'daki Oturum değişkeni)
+     * @param kullanıcı Kullanıcı kimliği (Header'daki Kullanici değişkeni
+     * @return  İşlemin başarılıysa 200, başarısızsa 500
+     */
+    @POST @Path("OturumKapat")
+    public Response OturumKapat(
+            @HeaderParam("Oturum") String oturum,
+            @HeaderParam("Kullanici") String kullanıcı)
+    {
+        OturumVT oturum_vt = VT.getOturumVT();
+        boolean kapandı = oturum_vt.OturumKapat(oturum, kullanıcı);
+
+        if (kapandı)
+            return Response.status(200).build();
+        return Response.status(500).build();
+    }
+    /**
+     * İstek başlığındaki bilgiler doğrultusunda oturumun geçerliliğini
+     * denetler.
+     * 
+     * @param oturum    Oturum kimliği (Header'daki Oturum değişkeni)
+     * @param kullanıcı Kullanıcı kimliği (Header'daki Kullanici değişkeni)
+     * @return  Oturum açıksa 200, kapalıysa 404, hata olursa 500
+     */
+    @POST @Path("OturumAçık")
+    public Response OturumAçık(
+            @HeaderParam("Oturum") String oturum,
+            @HeaderParam("Kullanici") String kullanıcı)
+    {
+        OturumVT oturum_vt = VT.getOturumVT();
+        byte oturum_durumu = oturum_vt.OturumAçık(oturum, kullanıcı);
+        if (oturum_durumu == 1)
+        {
+            return Response.status(200).build();
+        }
+        if (oturum_durumu < 0)
+        {
+            return Response.status(500).build();
+        }
+        
+        return Response.status(404).build();
     }
 }
