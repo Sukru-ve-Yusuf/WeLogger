@@ -10,6 +10,7 @@
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
+import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı.*;
 import java.util.*;
 import java.security.SecureRandom;
 import org.bson.Document;
@@ -81,6 +82,23 @@ public class Kullanıcı implements IKimlikli
         this.setKullanıcıAdı(kullanıcı_adı);
         this.parola = parola;
         this.ömür = null;
+    }
+    /**
+     * Eşsiz bir kimlik ile yeni bir kullanıcı oluşturur.
+     * 
+     * @param ad            Kullanıcının gerçek adı
+     * @param kullanıcı_adı Kullanıcının rumuzu
+     * @param parola        Kullanıcının karılmış parolası
+     * @param kullanıcı_vt  Kimlik eşsizliği için kullanıcı veri tabanı hizmeti
+     */
+    public Kullanıcı(String ad, String kullanıcı_adı, String parola,
+            KullanıcıVT kullanıcı_vt)
+    {
+        this.setAd(ad);
+        this.setKullanıcıAdı(kullanıcı_adı);
+        this.parola = parola;
+        this.ömür = null;
+        this.KimliğiYenile(kullanıcı_vt);
     }
     /**
      * Veri tabanı sorgusuyla elde edilmiş Document türündeki BSON belgesinin
@@ -229,12 +247,35 @@ public class Kullanıcı implements IKimlikli
         return b64encoder.encodeToString(this.kimlik);
     }
     /**
-     * Bu gün için yepyeni bir kimlik atar.
+     * Bu kullanıcı için yepyeni bir kimlik atar.
      */
     private void KimliğiYenile()
     {
         SecureRandom rast = new SecureRandom();
-        this.kimlik = new byte[32];
+        this.kimlik = new byte[33];
         rast.nextBytes(this.kimlik);
+    }
+    /**
+     * Bu kullanıcı için yepyeni bir eşsiz kimlik atar.
+     * 
+     * @param üye_vt    Eşsizlik denetimi için kullanıcı veri tabanı hizmeti
+     */
+    private void KimliğiYenile(KullanıcıVT üye_vt)
+    {
+        SecureRandom rast = new SecureRandom();
+        byte[] yeni = new byte[33];
+        rast.nextBytes(yeni);
+        Base64.Encoder b64encoder = Base64.getEncoder();
+        String yeni_b64 = b64encoder.encodeToString(yeni);
+        
+        byte kullanımda = üye_vt.KimlikKullanımda(yeni_b64);
+        if (kullanımda == 0)
+        {
+            this.kimlik = yeni;
+        }
+        else
+        {
+            KimliğiYenile(üye_vt);
+        }
     }
 }

@@ -67,6 +67,124 @@ public class KullanıcıVT
     }
     
     /**
+     * Belirtilen kullanıcı adının kaç kullanıcı tarafından kullanıldığını
+     * sayar.
+     * 
+     * @param kullanıcı_adı Niceliği istenen kullanıcı adı
+     * @return  Kullanıcı adının kaç kez kullanıldığı. Hata olursa -1.
+     */
+    public long KullanıcıAdıNiceliği(String kullanıcı_adı)
+    {
+        if (kullanıcı_adı == null)
+            return -1;
+        if (kullanıcı_adı.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            try
+            {
+                long nicelik = koleksiyon.countDocuments(
+                        eq("KullanıcıAdı", kullanıcı_adı));
+                return nicelik;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
+    
+    /**
+     * Belirtilen kimlik ile kullanıcı adına sahip kullanıcı olup olmadığını
+     * denetler.
+     * 
+     * @param kullanıcı_adı Aranan kullanıcı adı
+     * @param kimlik        Aranan kullanıcı kimliği
+     * @return  Kullanıcı varsa 1, yoksa 0, hata olursa -1
+     */
+    public byte KullanıcıVar(String kullanıcı_adı, String kimlik)
+    {
+        if (kullanıcı_adı == null || kullanıcı_adı.isBlank())
+            return -1;
+        if (kimlik == null || kimlik.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            try
+            {
+                long nicelik = koleksiyon.countDocuments(and(
+                        eq("_id", kimlik),
+                        eq("KullanıcıAdı", kullanıcı_adı)));
+                if (nicelik > 0)
+                {
+                    return 1;
+                }
+                return 0;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
+    
+    /**
+     * Belirtilen kullanıcı kimliğinin kullanımda olup olmadığını denetler.
+     * 
+     * @param kimlik    Aranan kullanıcı kimliği
+     * @return  Kimlik kullanımdaysa 1, değilse 0, hata olursa -1
+     */
+    public byte KimlikKullanımda(String kimlik)
+    {
+        if (kimlik == null || kimlik.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            try
+            {
+                long nicelik = koleksiyon.countDocuments(eq("_id", kimlik));
+                if (nicelik == 0)
+                    return 0;
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
+    
+    /**
      * Verilen kullanıcıyı veri tabanına kaydeder.
      * 
      * @param eklenecek Veri tabanına kaydedilecek kullanıcı

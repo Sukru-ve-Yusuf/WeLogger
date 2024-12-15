@@ -1,6 +1,11 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * ParolaHizmeti
+ * 
+ * Sürüm 0.1
+ * 
+ * Aralık 2024
+ * 
+ * Copyright (C) 2024 Yusuf Kozan, Şükrü Fırat Sarp
  */
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services;
 
@@ -8,10 +13,9 @@ import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models.*;
 import java.util.*;
 import java.security.SecureRandom;
 import static com.kosprov.jargon2.api.Jargon2.*;
+
 /**
- * Parolaların güvenli bir yolla işlenmesi için fonksiyonlar
- * 
- * @author yusuf
+ * Parolaların güvenli bir yolla işlenmesi için hizmet sınıfı
  */
 public class ParolaHizmeti
 {

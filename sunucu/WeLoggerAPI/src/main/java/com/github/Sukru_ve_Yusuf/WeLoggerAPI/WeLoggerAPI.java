@@ -1,7 +1,12 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * WeLoggerAPI
+ * 
+ * Sürüm 0.1
+ * 
+ * Aralık 2024
+ * 
+ * Copyright (C) 2024 Yusuf Kozan, Şükrü Fırat Sarp
  */
-
 
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI;
 
@@ -20,65 +25,38 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.annotation.*;
 
 /**
- *
- * @author yusuf
+ * Videolu günlük tutma uygulaması WeLogger'ın art ucunun ana sınıfı.
  */
-public class WeLoggerAPI {
-
+public class WeLoggerAPI
+{
+    /**
+     * WeLogger'ın başlangıç noktası.
+     * 
+     * @param args  Açılış değişkenleri (görmezden gelinecek)
+     */
     public static void main(String[] args)
     {
-        VeriTabanıHizmetleri vt_hizmetleri = VeriTabanıHizmetleri
-                .HizmetleriBaşlat("./DB.config.json");
-        ObjectMapper haritacı = new ObjectMapper();
-        Kullanıcı a = new Kullanıcı();
-        a.setKullanıcıAdı("kulad");
-        Calendar şimdi = Calendar.getInstance();
-        System.out.println(şimdi);
-        Calendar sonra = Calendar.getInstance();
-        sonra.add(Calendar.HOUR, 1);
-        Calendar önce = Calendar.getInstance();
-        önce.add(Calendar.HOUR, -1);
-        SıralıVideolar vid = new SıralıVideolar("./", "açıklama", a, şimdi);
-        vid.setSonraki(new SıralıVideolar("./vid2", "aç", a, sonra));
-        vid.setÖnceki(new SıralıVideolar("./vid3", "lama", a, önce));
-        Calendar bugün = new Calendar.Builder()
-                .setDate(şimdi.get(Calendar.YEAR),
-                        şimdi.get(Calendar.MONTH),
-                        şimdi.get(Calendar.DAY_OF_MONTH)).build();
-        System.out.println(bugün);
-        SıralıGünler günler = new SıralıGünler(a, "gün açıklaması", vid, bugün);
-        a.setÖmür(günler);
-        try
-        {
-            VideoVT vt_vid = vt_hizmetleri.getVideoVT();
-            System.out.println(vt_vid.TekVideoEkle(vid));
-            System.out.println(vt_vid.TekVideoEkle(vid.getSonraki()));
-            System.out.println(vt_vid.TekVideoEkle(vid.getÖnceki()));
-            System.out.println("---");
-            GünVT vt_gün = vt_hizmetleri.getGünVT();
-            System.out.println(vt_gün.TekGünEkle(günler));
-            System.out.println("---");
-            KullanıcıVT vt_üye = vt_hizmetleri.getKullanıcıVT();
-            System.out.println(vt_üye.KullanıcıEkle(a));
-            System.out.println("#####");
-            Kullanıcı b = vt_üye.KullanıcıOku(a.getKimlikBase64());
-            System.out.println(a.getKimlikBase64());
-            System.out.println(b.getKimlikBase64());
-            System.out.println(günler.getKimlikBase64());
-            System.out.println(b.getÖmrünKimliği());
-            System.out.println(vid.getKimlikBase64());
-            System.out.println(b.getÖmür().getVideolarınKimliği());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        /*
         JAXRSServerFactoryBean factoryBean = new JAXRSServerFactoryBean();
-        factoryBean.setResourceClasses(DeneyselController.class);
+        
+        VeriTabanıHizmetleri VT = VeriTabanıHizmetleri
+                .HizmetleriBaşlat("./DB.config.json");
+        if (VT == null)
+        {
+            System.out.println("Veri tabanı hizmetleri başlatılamadı.");
+            return;
+        }
+        
+        ÜyelikDenetçisi üye_denet = ÜyelikDenetçisi.Başlat(VT);
+        if (üye_denet == null)
+        {
+            System.out.println("Üyelik Denetçisi başlatılamadı.");
+            return;
+        }
+        
+        //factoryBean.setResourceClasses(ÜyelikDenetçisi.class);
+        factoryBean.setServiceBean(üye_denet);
         factoryBean.setAddress("http://localhost:9000/");
         factoryBean.create();
-        */
     }
     
 }
