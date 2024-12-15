@@ -23,15 +23,24 @@ import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import com.mongodb.client.result.*;
 import static com.mongodb.client.model.Filters.*;
+
 /**
  * Günlerin veri tabanı işlemleri için bir hizmet sınıfı.
+ * 
+ * @see SıralıGünler
+ * @see Gün
  */
 public class GünVT
 {
     /**
      * Uygulamada yer alan veri tabanı hizmetlerine erişim sağlar.
+     * 
+     * @see VeriTabanıHizmetleri
      */
     private VeriTabanıHizmetleri VT;
+    /**
+     * Veri tabanında günlerin tutulduğu koleksiyonun adı.
+     */
     private final String KoleksiyonAdı = "gün";
     
     /**

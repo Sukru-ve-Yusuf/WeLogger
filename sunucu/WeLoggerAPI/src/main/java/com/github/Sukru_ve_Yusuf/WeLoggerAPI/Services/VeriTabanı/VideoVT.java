@@ -26,13 +26,21 @@ import static com.mongodb.client.model.Filters.*;
 
 /**
  * Videoların veri tabanı sorguları için bir hizmet sınıfı.
+ * 
+ * @see SıralıVideolar
+ * @see Video
  */
 public class VideoVT
 {
     /**
      * Uygulamada yer alan veri tabanı hizmetlerine erişim sağlar.
+     * 
+     * @see VeriTabanıHizmetleri
      */
     private VeriTabanıHizmetleri VT;
+    /**
+     * Veri tabanında videoların tutulduğu koleksiyonun adı.
+     */
     private final String KoleksiyonAdı = "video";
     
     /**

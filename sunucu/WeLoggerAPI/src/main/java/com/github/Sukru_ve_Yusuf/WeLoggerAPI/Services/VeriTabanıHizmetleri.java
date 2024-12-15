@@ -55,6 +55,13 @@ public class VeriTabanıHizmetleri
      * @see Kullanıcı
      */
     private KullanıcıVT kullanıcı_vt;
+    /**
+     * Veri tabanındaki oturum bilgilerine erişim sağlayan hizmet.
+     * 
+     * @see OturumVT
+     * @see Oturum
+     */
+    private OturumVT oturum_vt;
     
     /**
      * Veri tabanı hizmetlerini başlatıp bir araya getirir.
@@ -95,6 +102,11 @@ public class VeriTabanıHizmetleri
         if (kullanıcı_hizmeti == null)
             return null;
         hizmetler.kullanıcı_vt = kullanıcı_hizmeti;
+        
+        OturumVT oturum_hizmeti = OturumVT.Başlat(hizmetler);
+        if (oturum_hizmeti == null)
+            return null;
+        hizmetler.oturum_vt = oturum_hizmeti;
         
         return hizmetler;
     }
@@ -148,5 +160,16 @@ public class VeriTabanıHizmetleri
     public KullanıcıVT getKullanıcıVT()
     {
         return this.kullanıcı_vt;
+    }
+    /**
+     * Veri tabanındaki oturum bilgilerine erişim sağlayan hizmete
+     * erişim sağlar.
+     * 
+     * @return  Oturum veri tabanı hizmeti
+     * @see OturumVT
+     */
+    public OturumVT getOturumVT()
+    {
+        return this.oturum_vt;
     }
 }

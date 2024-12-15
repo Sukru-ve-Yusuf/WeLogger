@@ -23,15 +23,23 @@ import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import com.mongodb.client.result.*;
 import static com.mongodb.client.model.Filters.*;
+
 /**
  * Kullanıcı nesnelerinin veri tabanı işlemleri için bir hizmet sınıfı.
+ * 
+ * @see Kullanıcı
  */
 public class KullanıcıVT
 {
     /**
      * Uygulamada yer alan veri tabanı hizmetlerine erişim sağlar.
+     * 
+     * @see VeriTabanıHizmetleri
      */
     private VeriTabanıHizmetleri VT;
+    /**
+     * Veri tabanında üyelerin tutulduğu koleksiyonun adı.
+     */
     private final String KoleksiyonAdı = "kullanıcı";
     
     /**
