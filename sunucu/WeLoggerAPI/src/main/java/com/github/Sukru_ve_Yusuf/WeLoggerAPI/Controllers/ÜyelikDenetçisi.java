@@ -61,6 +61,16 @@ public class ÜyelikDenetçisi
         return üye_d;
     }
     
+    /**
+     * Verilen bilgilerle yeni bir kullanıcı oluşturur.
+     * Kullanıcı adı başka biri tarafından kullanılıyorsa işlem yapmaz.
+     * 
+     * @param Ad            Yeni kullanıcının adı.
+     * @param KullanıcıAdı  Yeni kullanıcının rumuzu
+     * @param Parola        Yeni kullanıcının parolası
+     * @return  Yeni kullanıcı oluşturulursa 200, oluşturulmazsa 400,
+     *          hata olursa 500
+     */
     @PUT @Path("ÜyeOl/{Ad}/{KullaniciAdi}/{Parola}/")
     public Response ÜyeOl(
             @PathParam("Ad") String Ad,
@@ -101,6 +111,59 @@ public class ÜyelikDenetçisi
         {
             e.printStackTrace();
             return Response.status(400).build(); // Bad Request
+        }
+    }
+    
+    /**
+     * Kimlik bilgileri verilen kullanıcı için yeni oturum başlatır.
+     * 
+     * @param KullanıcıAdı  Oturum açan kullanıcının kullanıcı adı
+     * @param Parola        Oturum açan kullanıcının karılmamış parolası
+     * @return  Yeni oturum başlatılırsa 200 ile oturum bilgilerini içeren JSON,
+     *          başlatılmazsa 403, bilgiler girilmemişse 400, hata olursa 500
+     */
+    @POST @Path("OturumAç/{KullaniciAdi}/{Parola}/")
+    @Produces("application/json")
+    public Response OturumAç(
+            @PathParam("KullaniciAdi") String KullanıcıAdı,
+            @PathParam("Parola") String Parola)
+    {
+        if (KullanıcıAdı == null || KullanıcıAdı.isBlank())
+            return Response.status(400).build(); // Bad Request
+        if (Parola == null || Parola.isEmpty())
+            return Response.status(400).build(); // Bad Request
+        
+        try
+        {
+            KullanıcıVT kullanıcı_vt = VT.getKullanıcıVT();
+            OturumVT oturum_vt = VT.getOturumVT();
+            Kullanıcı girecek = kullanıcı_vt.KullanıcıAdıylaBul(KullanıcıAdı);
+            if (girecek == null)
+                return Response.status(403).build(); // Forbidden
+            
+            boolean parola_doğru = ParolaHizmeti.ParolaDoğru(Parola,
+                    girecek.getParola());
+            
+            if (parola_doğru)
+            {
+                Oturum yeni_oturum = Oturum.Başlat(
+                        girecek.getKimlikBase64(),
+                        12,
+                        oturum_vt);
+                if (yeni_oturum == null)
+                    return Response.status(500).build();
+                
+                ObjectMapper haritacı = new ObjectMapper();
+                String oturum_json = haritacı.writeValueAsString(yeni_oturum);
+                Response yanıt = Response.status(200).entity(oturum_json)
+                        .type("application/json").build();
+                return yanıt;
+            }
+            return Response.status(403).build(); // Forbidden
+        }
+        catch (Exception e)
+        {
+            return Response.status(500).build();
         }
     }
 }

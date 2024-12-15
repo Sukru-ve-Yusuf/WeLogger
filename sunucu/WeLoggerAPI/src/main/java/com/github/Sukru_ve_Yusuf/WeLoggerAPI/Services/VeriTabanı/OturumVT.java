@@ -65,4 +65,103 @@ public class OturumVT
         oturum_vt.VT = vt_hizmetleri;
         return oturum_vt;
     }
+    
+    /**
+     * Belirtilen oturum kimliğinin kullanımda olup olmadığını denetler.
+     * 
+     * @param kimlik    Aranan oturum kimliği
+     * @return  Kimlik kullanımdaysa 1, değilse 0, hata olursa -1
+     */
+    public byte KimlikKullanımda(String kimlik)
+    {
+        if (kimlik == null || kimlik.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            try
+            {
+                long nicelik = koleksiyon.countDocuments(eq("_id", kimlik));
+                if (nicelik == 0)
+                    return 0;
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
+    
+    /**
+     * Belirtilen oturumun açık olup olmadığını denetler.
+     * 
+     * @param kimlik    Denetlenen oturumun kimliği
+     * @param kullanıcı Denetlenen oturumun kullanıcısı
+     * @return  Oturum açıksa 1, bitmişse 0, henüz başlamamışsa 2,
+     *          hata olursa -1
+     */
+    public byte OturumAçık(String kimlik, String kullanıcı)
+    {
+        if (kimlik == null || kimlik.isBlank())
+            return -1;
+        if (kullanıcı == null || kullanıcı.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            try
+            {
+                Document oturum = koleksiyon.find(and(
+                        eq("_id", kimlik),
+                        eq("Kullanıcı", kullanıcı))).first();
+                if (oturum == null)
+                    return 0;
+
+                long baş = oturum.get("Baş", long.class);
+                Calendar başlangıç = new Calendar.Builder()
+                        .setInstant(baş).build();
+                
+                long son = oturum.get("Son", long.class);
+                Calendar bitiş = new Calendar.Builder()
+                        .setInstant(son).build();
+
+                Calendar şimdi = Calendar.getInstance();
+                
+                if (başlangıç.after(bitiş))
+                    return -1;
+                
+                if (şimdi.before(başlangıç))
+                    return 2; // Başlamamış
+                
+                if (şimdi.before(bitiş))
+                    return 1; // Açık
+                
+                return 0; // Bitmiş
+                
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
 }

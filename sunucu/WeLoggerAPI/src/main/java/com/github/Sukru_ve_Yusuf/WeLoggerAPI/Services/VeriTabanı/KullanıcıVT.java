@@ -261,4 +261,41 @@ public class KullanıcıVT
         }
     }
     
+    /**
+     * Kullanıcı adı belirtilen kullanıcıyı ömrüyle birlikte
+     * veri tabanından getirir.
+     * 
+     * @param kullanıcı_adı İstenen kullanıcının kullanıcı adı
+     * @return  Ömrüyle birlikte, kullanıcı adı verilen kullanıcı.
+     *          Kullanıcı bulunamazsa null.
+     */
+    public Kullanıcı KullanıcıAdıylaBul(String kullanıcı_adı)
+    {
+        if (kullanıcı_adı == null)
+            return null;
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            Document sonuç = koleksiyon
+                    .find(eq("KullanıcıAdı", kullanıcı_adı))
+                    .first();
+            if (sonuç == null)
+            {
+                return null;
+            }
+            
+            Kullanıcı bulunan = Kullanıcı.BSONBelgesinden(sonuç);
+            bulunan.setÖmür(VT.getGünVT().GünleriOku(sonuç.getString("Ömür")));
+            return bulunan;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

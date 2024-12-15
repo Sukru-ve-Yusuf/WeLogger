@@ -12,6 +12,7 @@ package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 import java.util.*;
 import java.security.SecureRandom;
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
+import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı.*;
 import com.fasterxml.jackson.annotation.*;
 
 /**
@@ -54,6 +55,23 @@ public class Oturum implements IKimlikli
         this.KimliğiYenile();
     }
     /**
+     * Yepyeni bir eşsiz kimlikle oturum nesnesi oluşturur.
+     * 
+     * @param kullanıcı_kimliği Oturumun iyesi olan kullanıcının kimliği
+     * @param baş               Oturumun başlangıç tarihi
+     * @param son               Oturumun bitiş tarihi
+     * @param oturum_vt         Eşsizlik denetimi için oturum veri tabanı
+     *                          hizmeti
+     */
+    public Oturum(String kullanıcı_kimliği, Calendar baş, Calendar son,
+            OturumVT oturum_vt)
+    {
+        this.setKullanıcı(kullanıcı_kimliği);
+        this.setBaş(baş);
+        this.setSon(son);
+        this.KimliğiYenile(oturum_vt);
+    }
+    /**
      * Belirtilen kimlikle oturum nesnesi oluşturur.
      * 
      * @param kullanıcı_kimliği Oturumun iyesi olan kullanıcının kimliği
@@ -89,6 +107,21 @@ public class Oturum implements IKimlikli
         this.setSon(son);
         Base64.Decoder b64decoder = Base64.getDecoder();
         this.kimlik = b64decoder.decode(kimlik_base64);
+    }
+    
+    public static Oturum Başlat(String kullanıcı_kimliği, int süre_saat,
+            OturumVT oturum_vt)
+    {
+        if (süre_saat <= 0)
+            return null;
+        
+        Calendar başlangıç = Calendar.getInstance();
+        Calendar bitiş = (Calendar)başlangıç.clone();
+        bitiş.add(Calendar.HOUR, süre_saat);
+        
+        Oturum yeni = new Oturum(kullanıcı_kimliği, başlangıç, bitiş,
+                oturum_vt);
+        return yeni;
     }
     
     /**
@@ -168,7 +201,30 @@ public class Oturum implements IKimlikli
     private void KimliğiYenile()
     {
         SecureRandom rast = new SecureRandom();
-        this.kimlik = new byte[32];
+        this.kimlik = new byte[33];
         rast.nextBytes(this.kimlik);
+    }
+    /**
+     * Bu oturum için yepyeni bir eşsiz kimlik atar.
+     * 
+     * @param oturum_vt Eşsizlik denetimi için oturum veri tabanı hizmeti
+     */
+    private void KimliğiYenile(OturumVT oturum_vt)
+    {
+        SecureRandom rast = new SecureRandom();
+        byte[] yeni = new byte[33];
+        rast.nextBytes(yeni);
+        Base64.Encoder b64encoder = Base64.getEncoder();
+        String yeni_b64 = b64encoder.encodeToString(yeni);
+        
+        byte kullanımda = oturum_vt.KimlikKullanımda(yeni_b64);
+        if (kullanımda == 0)
+        {
+            this.kimlik = yeni;
+        }
+        else
+        {
+            KimliğiYenile(oturum_vt);
+        }
     }
 }
