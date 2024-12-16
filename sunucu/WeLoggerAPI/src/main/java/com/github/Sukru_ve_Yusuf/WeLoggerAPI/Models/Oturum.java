@@ -109,6 +109,15 @@ public class Oturum implements IKimlikli
         this.kimlik = b64decoder.decode(kimlik_base64);
     }
     
+    /**
+     * Belirtilen kişi için belirtilen süre kadar, eşsiz kimlikli
+     * bir oturum başlatır.
+     * 
+     * @param kullanıcı_kimliği Oturumun kullanıcısının kimliği
+     * @param süre_saat         Oturumun kaç saat süreceği
+     * @param oturum_vt     Eşsizlik denetimi için oturum veri tabanı hizmeti
+     * @return  Oluşturulan yeni oturum nesnesi, süre pozitif değilse null
+     */
     public static Oturum Başlat(String kullanıcı_kimliği, int süre_saat,
             OturumVT oturum_vt)
     {

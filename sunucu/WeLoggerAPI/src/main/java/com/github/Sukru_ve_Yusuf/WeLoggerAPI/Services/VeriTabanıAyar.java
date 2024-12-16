@@ -88,6 +88,11 @@ public class VeriTabanıAyar
         }
     }
     
+    /**
+     * Ayar belgesindeki bilgileri kullanarak MongoDB'ye bağlanmak için url.
+     * 
+     * @return  MongoDB bağlantı dizesi
+     */
     public String MongoBağlantıDizesi()
     {
         try
