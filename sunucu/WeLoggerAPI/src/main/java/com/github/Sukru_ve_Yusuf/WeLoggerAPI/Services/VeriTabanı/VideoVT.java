@@ -68,6 +68,78 @@ public class VideoVT
     }
     
     /**
+     * Belirtilen kimlikte bir video olup olmadığını denetler.
+     * 
+     * @param kimlik    Aranan video kimliği
+     * @return  Kimlik kullanımdaysa 1, değilse 0, hata olursa -1
+     */
+    public byte KimlikKullanımda(String kimlik)
+    {
+        if (kimlik == null || kimlik.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı
+                    .getCollection(this.KoleksiyonAdı);
+            
+            try
+            {
+                long nicelik = koleksiyon.countDocuments(eq("_id", kimlik));
+                if (nicelik == 0)
+                    return 0;
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
+    /**
+     * Belirtilen konumdaki videonun zaten kayıtlı olup olmadığını denetler.
+     * 
+     * @param dosya_yolu    Videonun dosya sistemindeki konumu
+     * @return  Video zaten kayıtlıysa 1, değilse 0, hata olursa -1
+     */
+    public byte VideoVar(String dosya_yolu)
+    {
+        if (dosya_yolu == null || dosya_yolu.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı
+                    .getCollection(this.KoleksiyonAdı);
+            
+            try
+            {
+                long nicelik = koleksiyon.countDocuments(
+                        eq("DosyaYolu", dosya_yolu));
+                if (nicelik == 0)
+                    return 0;
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
+    
+    /**
      * Verilen videoyu, geçmişini ve geleceğini pek umursamadan, tek başına
      * veri tabanına kaydeder.
      * 

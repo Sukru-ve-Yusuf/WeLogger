@@ -10,6 +10,7 @@
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
+import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı.*;
 import java.util.*;
 import org.bson.Document;
 import com.fasterxml.jackson.annotation.*;
@@ -89,6 +90,13 @@ public class SıralıGünler extends Gün
             @JsonProperty("_id") String kimlik)
     {
         super(başkahraman, açıklama, tarih, kimlik);
+        this.setÖnceki(null);
+        this.setSonraki(null);
+    }
+    public SıralıGünler(String başkahraman, String açıklama, Calendar tarih,
+            GünVT gün_vt)
+    {
+        super(başkahraman, açıklama, tarih, gün_vt);
         this.setÖnceki(null);
         this.setSonraki(null);
     }

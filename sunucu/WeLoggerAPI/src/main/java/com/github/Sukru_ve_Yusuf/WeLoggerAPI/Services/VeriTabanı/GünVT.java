@@ -68,6 +68,41 @@ public class GünVT
     }
     
     /**
+     * Belirtilen kimlikte bir gün olup olmadığını denetler.
+     * 
+     * @param kimlik    Aranan gün kimliği
+     * @return  Kimlik kullanımdaysa 1, değilse 0, hata olursa -1
+     */
+    public byte KimlikKullanımda(String kimlik)
+    {
+        if (kimlik == null || kimlik.isBlank())
+            return -1;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı
+                    .getCollection(this.KoleksiyonAdı);
+            
+            try
+            {
+                long nicelik = koleksiyon.countDocuments(eq("_id", kimlik));
+                if (nicelik == 0)
+                    return 0;
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+    }
+    /**
      * Verilen günü, geçmişini ve geleceğini pek umursamadan, tek başına
      * veri tabanına kaydeder.
      * 

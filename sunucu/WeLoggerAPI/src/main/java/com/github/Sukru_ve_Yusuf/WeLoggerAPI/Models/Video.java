@@ -10,6 +10,7 @@
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
+import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı.*;
 import java.util.*;
 import java.security.SecureRandom;
 import com.fasterxml.jackson.annotation.*;
@@ -74,6 +75,25 @@ public class Video implements IKimlikli
         this.iye = iye.getKimlikBase64();
         this.tarih = tarih;
         this.KimliğiYenile();
+    }
+    /**
+     * Verilen bilgilerle yeni bir video nesnesi oluşturur.
+     * Oluşturulan nesneye yeni bir eşsiz kimlik atanır.
+     * 
+     * @param dosya_yolu        Videonun dosya sistemindeki konumu
+     * @param açıklama          Kullanıcının video hakkında açıklama metni
+     * @param kullanıcı_kimliği Videonun sahibinin kullanıcı kimliği
+     * @param tarih             Videonun çekildiği tarih ve saat bilgisi
+     * @param video_vt          Kimlik eşsizliği video veri tabanı hizmeti
+     */
+    public Video(String dosya_yolu, String açıklama, String kullanıcı_kimliği,
+            Calendar tarih, VideoVT video_vt)
+    {
+        this.setDosyaYolu(dosya_yolu);
+        this.setAçıklama(açıklama);
+        this.setİye(kullanıcı_kimliği);
+        this.setTarih(tarih);
+        this.KimliğiYenile(video_vt);
     }
     /**
      * Verilen bilgilerle yeni bir video nesnesi oluşturur.
@@ -230,11 +250,35 @@ public class Video implements IKimlikli
     /**
      * Video için yepyeni bir kimlik atar.
      */
-    private void KimliğiYenile()
+    protected void KimliğiYenile()
     {
         SecureRandom rast = new SecureRandom();
-        kimlik = new byte[32];
+        kimlik = new byte[33];
         rast.nextBytes(this.kimlik);
+    }
+    /**
+     * Video için yepyeni bir eşsiz kimlik atar.
+     * 
+     * @param video_vt  Eşsizlik denetimi için video veri tabanı hizmeti
+     */
+    protected void KimliğiYenile(VideoVT video_vt)
+    {
+        SecureRandom rast = new SecureRandom();
+        byte[] yeni = new byte[33];
+        rast.nextBytes(yeni);
+        
+        Base64.Encoder b64encoder = Base64.getEncoder();
+        String yeni_b64 = b64encoder.encodeToString(yeni);
+        
+        byte kullanımda = video_vt.KimlikKullanımda(yeni_b64);
+        if (kullanımda == 0)
+        {
+            this.kimlik = yeni;
+        }
+        else
+        {
+            this.KimliğiYenile(video_vt);
+        }
     }
     
     /**

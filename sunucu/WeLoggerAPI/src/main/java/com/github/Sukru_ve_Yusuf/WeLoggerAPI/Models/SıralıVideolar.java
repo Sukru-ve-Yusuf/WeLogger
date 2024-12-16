@@ -10,6 +10,7 @@
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
+import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı.*;
 import java.util.*;
 import com.fasterxml.jackson.annotation.*;
 import org.bson.Document;
@@ -57,6 +58,23 @@ public class SıralıVideolar extends Video
             Kullanıcı iye, Calendar tarih)
     {
         super(dosya_yolu, açıklama, iye, tarih);
+        this.önceki = null;
+        this.sonraki = null;
+    }
+    /**
+     * Verilen bilgilerle yeni bir sıralı video nesnesi oluşturur.
+     * Oluşturulan nesneye yeni bir eşsiz kimlik atanır.
+     * 
+     * @param dosya_yolu        Videonun dosya sistemindeki konumu
+     * @param açıklama          Kullanıcının video hakkında açıklama metni
+     * @param kullanıcı_kimliği Videonun sahibinin kullanıcı kimliği
+     * @param tarih             Videonun çekildiği tarih ve saat bilgisi
+     * @param video_vt          Kimlik eşsizliği video veri tabanı hizmeti
+     */
+    public SıralıVideolar(String dosya_yolu, String açıklama,
+            String kullanıcı_kimliği, Calendar tarih, VideoVT video_vt)
+    {
+        super(dosya_yolu, açıklama, kullanıcı_kimliği, tarih, video_vt);
         this.önceki = null;
         this.sonraki = null;
     }

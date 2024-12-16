@@ -10,6 +10,7 @@
 package com.github.Sukru_ve_Yusuf.WeLoggerAPI.Models;
 
 import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Interfaces.*;
+import com.github.Sukru_ve_Yusuf.WeLoggerAPI.Services.VeriTabanı.*;
 import java.util.*;
 import java.security.SecureRandom;
 import com.fasterxml.jackson.annotation.*;
@@ -110,6 +111,25 @@ public class Gün implements IKimlikli
         this.setVideolar(null);
         Base64.Decoder b64decoder = Base64.getDecoder();
         this.kimlik = b64decoder.decode(kimlik);
+    }
+    /**
+     * Verilen bilgilerle eşsiz kimliği olan bir gün oluşturur.
+     * 
+     * @param başkahraman   Günü yaşayan kullanıcının kimliği
+     * @param açıklama      Gün hakkında açıklama metni
+     * @param tarih         Günün tarihi
+     * @param gün_vt        Kimlik eşsizliği için gün veri tabanı hizmeti
+     * 
+     * @seee GünVT
+     */
+    public Gün(String başkahraman, String açıklama, Calendar tarih,
+            GünVT gün_vt)
+    {
+        this.başkahraman = başkahraman;
+        this.setAçıklama(açıklama);
+        this.setTarih(tarih);
+        this.KimliğiYenile(gün_vt);
+        this.setVideolar(null);
     }
     
     /**
@@ -243,7 +263,31 @@ public class Gün implements IKimlikli
     protected void KimliğiYenile()
     {
         SecureRandom rast = new SecureRandom();
-        this.kimlik = new byte[32];
+        this.kimlik = new byte[33];
         rast.nextBytes(this.kimlik);
+    }
+    /**
+     * Gün için yepyeni bir eşsiz kimlik atar.
+     * 
+     * @param gün_vt  Eşsizlik denetimi için gün veri tabanı hizmeti
+     */
+    protected void KimliğiYenile(GünVT gün_vt)
+    {
+        SecureRandom rast = new SecureRandom();
+        byte[] yeni = new byte[33];
+        rast.nextBytes(yeni);
+        
+        Base64.Encoder b64encoder = Base64.getEncoder();
+        String yeni_b64 = b64encoder.encodeToString(yeni);
+        
+        byte kullanımda = gün_vt.KimlikKullanımda(yeni_b64);
+        if (kullanımda == 0)
+        {
+            this.kimlik = yeni;
+        }
+        else
+        {
+            this.KimliğiYenile(gün_vt);
+        }
     }
 }
