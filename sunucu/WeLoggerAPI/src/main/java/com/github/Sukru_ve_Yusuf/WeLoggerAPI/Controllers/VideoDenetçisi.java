@@ -20,6 +20,7 @@ import java.io.*;
 import java.util.*;
 import org.bson.Document;
 import com.fasterxml.jackson.databind.*;
+import org.apache.cxf.helpers.IOUtils;
 
 /**
  * Video işlemlerini yürütmek üzere API denetçisi.
@@ -303,19 +304,21 @@ public class VideoDenetçisi
     }
     
     /**
-     * Bu özellik tasarım aşamasında
+     * Yüklenen videoyu veri tabanına kaydeder.
      * 
-     * @param oturum
-     * @param kullanıcı
-     * @param tarih
-     * @param content_type
-     * @param gövde
-     * @return 
+     * @param oturum    Oturum kimliği
+     * @param kullanıcı Kullanıcı kimliği
+     * @param açıklama  Video açıklaması
+     * @param tarih     Milisaniye cinsinden tarih
+     * @param content_type  Dosya türü (video/mp4)
+     * @param gövde     İstek gövdesi
+     * @return  Başarılı olursa 200
      */
     @PUT @Path("/VideoYükle") @Consumes("video/mp4")
     public Response VideoYükle(
             @HeaderParam("Oturum") String oturum,
             @HeaderParam("Kullanici") String kullanıcı,
+            @HeaderParam("Açıklama") String açıklama,
             @HeaderParam("VideoTarihi") Long tarih,
             @HeaderParam("Content-Type") String content_type,
             InputStream gövde)
@@ -340,14 +343,44 @@ public class VideoDenetçisi
             return Response.status(418).build();
         }
         
+        try
+        {
+            File geçici = new File("geçici");
+            FileOutputStream os = new FileOutputStream(geçici);
+            IOUtils.copy(gövde, os);
+            
+            SıralıVideolar eklenen = new SıralıVideolar(
+                    geçici.getPath(), açıklama,
+                    kullanıcı, new Calendar.Builder().setInstant(tarih).build(), 
+                    VT.getVideoVT());
+            String yeni_yol = "./Videolar/" + eklenen.getKimlikBase64() +
+                    ".mp4";
+            File esas = new File(yeni_yol);
+            boolean taşındı = geçici.renameTo(esas);
+            if (taşındı)
+            {
+                eklenen.setDosyaYolu(yeni_yol);
+                Calendar video_tarihi = eklenen.getTarih();
+                SıralıGünler vid_günü = iye.getÖmür().GünüBul(
+                        video_tarihi.get(Calendar.YEAR),
+                        video_tarihi.get(Calendar.MONTH)+1,
+                        video_tarihi.get(Calendar.DAY_OF_MONTH));
+                vid_günü.getVideolar().DüğümEkle(eklenen);
+                boolean eklendi = VT.getVideoVT()
+                        .VideolarıGüncelle(vid_günü.getVideolar());
+                
+                if (eklendi)
+                {
+                    return Response.status(200).build();
+                }
+            }
+            
+            return Response.status(500).build();
+        }
+        catch (Exception e)
+        {
+            return Response.status(500).build();
+        }
         
-        /* 
-         * 
-         * Şu noktada pek gücüm kalmadı.
-         * 
-         * 
-         */
-        
-        return Response.status(500).build();
     }
 }

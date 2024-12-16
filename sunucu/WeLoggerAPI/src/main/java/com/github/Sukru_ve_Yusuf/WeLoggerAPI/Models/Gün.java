@@ -120,7 +120,7 @@ public class Gün implements IKimlikli
      * @param tarih         Günün tarihi
      * @param gün_vt        Kimlik eşsizliği için gün veri tabanı hizmeti
      * 
-     * @seee GünVT
+     * @see GünVT
      */
     public Gün(String başkahraman, String açıklama, Calendar tarih,
             GünVT gün_vt)

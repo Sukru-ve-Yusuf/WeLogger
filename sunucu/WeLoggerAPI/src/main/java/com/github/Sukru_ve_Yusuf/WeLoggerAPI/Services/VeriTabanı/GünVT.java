@@ -284,8 +284,7 @@ public class GünVT
     /**
      * Bu özellik tasarım aşamasında
      * 
-     * @param güncellenecek
-     * @return 
+     * @author Yusuf Kozan
      */
     public byte Günücelle(SıralıGünler güncellenecek)
     {

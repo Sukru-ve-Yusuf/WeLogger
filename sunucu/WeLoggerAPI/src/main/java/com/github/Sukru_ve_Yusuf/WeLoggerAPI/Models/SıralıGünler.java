@@ -101,7 +101,7 @@ public class SıralıGünler extends Gün
      * @param tarih         Günün tarihi
      * @param gün_vt        Kimlik eşsizliği için gün veri tabanı hizmeti
      * 
-     * @seee GünVT
+     * @see GünVT
      */
     public SıralıGünler(String başkahraman, String açıklama, Calendar tarih,
             GünVT gün_vt)
