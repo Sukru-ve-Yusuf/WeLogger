@@ -74,7 +74,8 @@ public class VideoDenetçisi
      * @return  200 ile bulunan günlerin bilgilerinin olduğu bir JSON,
      *          gün bulunamazsa 404
      */
-    @POST @Path("Günlerim")
+    @GET @Path("Günlerim")
+    @Produces("application/json")
     public Response Günlerim(
             @HeaderParam("Oturum") String oturum,
             @HeaderParam("Kullanici") String kullanıcı)
@@ -143,7 +144,8 @@ public class VideoDenetçisi
      * @return  Bulunursa 200 ile günün video bilgilerinin olduğu JSON,
      *          bulunamazsa 404.
      */
-    @POST @Path("GününVideoları/{yil}/{ay}/{gun}/")
+    @GET @Path("GününVideoları/{yil}/{ay}/{gun}/")
+    @Produces("application/json")
     public Response GününVideoları(
             @HeaderParam("Oturum") String oturum,
             @HeaderParam("Kullanici") String kullanıcı,
