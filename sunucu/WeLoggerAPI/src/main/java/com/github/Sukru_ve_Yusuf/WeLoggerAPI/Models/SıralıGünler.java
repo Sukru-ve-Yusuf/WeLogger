@@ -203,6 +203,12 @@ public class SıralıGünler extends Gün
         }
     }
     
+    /**
+     * Günlerin tarihlerini ve açıklamalarını dizi olarak döndürür.
+     * 
+     * @return  Günler tarihleri ile açıklamaları. İlk boyut sırayı;
+     *          ikinci boyut 0'da tarihi, 1'de açıklamayı tutar.
+     */
     public String[][] TarihlerİleAçıklamalar()
     {
         SıralıGünler kafa1 = this.Kök();
@@ -239,6 +245,78 @@ public class SıralıGünler extends Gün
         tarihler[sıra][1] = kafa2.getAçıklama();
         
         return tarihler;
+    }
+    /**
+     * Yıl, ay, gün değerleri verilen günü arar.
+     * 
+     * @param yıl   Aranan günün yılı
+     * @param ay    Aranan günün ayı (1-12)
+     * @param gün   Aranan günün ayın kaçıncı günü olduğu
+     * @return  Bulunan gün nesnesi, bulunamazsa null
+     */
+    public SıralıGünler GünüBul(int yıl, int ay, int gün)
+    {
+        try
+        {
+            Calendar aranan = new Calendar.Builder().setDate(yıl, ay-1, gün)
+                    .build();
+            
+            SıralıGünler kafa = this;
+            if (AynıGün(kafa.tarih, aranan))
+            {
+                return kafa;
+            }
+            if (aranan.after(kafa.tarih))
+            {
+                while (kafa.getSonraki() != null)
+                {
+                    kafa = kafa.getSonraki();
+                    if (AynıGün(aranan, kafa.tarih))
+                    {
+                        return kafa;
+                    }
+                    if (aranan.after(kafa))
+                    {
+                        continue;
+                    }
+                    return null;
+                }
+            }
+            if (aranan.before(kafa.tarih))
+            {
+                while (kafa.getÖnceki() != null)
+                {
+                    kafa = kafa.getÖnceki();
+                    if (AynıGün(aranan, kafa.tarih))
+                    {
+                        return kafa;
+                    }
+                    if (aranan.after(kafa))
+                    {
+                        continue;
+                    }
+                    return null;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+        return null;
+    }
+    
+    /**
+     * Verilen iki tarihin aynı günde olup olmadığını denetler.
+     * 
+     * @param a İlk tarih
+     * @param b İkinci tarih
+     * @return  Aynı gündelerse true, değilse false
+     */
+    private static boolean AynıGün(Calendar a, Calendar b)
+    {
+        return (a.get(Calendar.YEAR) == b.get(Calendar.YEAR) &&
+                a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_MONTH));
     }
     
     /**

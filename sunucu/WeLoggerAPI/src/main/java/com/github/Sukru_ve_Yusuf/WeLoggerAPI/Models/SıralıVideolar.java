@@ -208,6 +208,66 @@ public class SıralıVideolar extends Video
     }
     
     /**
+     * Videoların tarihlerini, açıklamalarını ve kimliklerini dizi olarak
+     * döndürür.
+     * 
+     * @return  Videoların tarihler, açıklamaları ve kimlikleri.
+     *          İlk boyut sırayı; ikinci boyut 0'da tarihi, 1'de açıklamayı,
+     *          2'de kimliği tutar.
+     */
+    public String[][] TarihlerAçıklamalarVeKimlikler()
+    {
+        SıralıVideolar kafa1 = this.Kök();
+        SıralıVideolar kafa2 = kafa1;
+        int nicelik = 1;
+        while (kafa1.getSonraki() != null)
+        {
+            nicelik++;
+            kafa1 = kafa1.getSonraki();
+        }
+        
+        String[][] tarihler = new String[nicelik][2];
+        int sıra = 0;
+        while (kafa2.getSonraki() != null)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(kafa2.tarih.get(Calendar.YEAR));
+            sb.append(" ");
+            sb.append((this.tarih.get(Calendar.MONTH) + 1));
+            sb.append(" ");
+            sb.append(this.tarih.get(Calendar.DAY_OF_MONTH));
+            sb.append(" ");
+            sb.append(this.tarih.get(Calendar.HOUR_OF_DAY));
+            sb.append(" ");
+            sb.append(this.tarih.get(Calendar.MINUTE));
+            sb.append(" ");
+            sb.append(this.tarih.get(Calendar.SECOND));
+            tarihler[sıra][0] = sb.toString();
+            tarihler[sıra][1] = kafa2.getAçıklama();
+            tarihler[sıra][2] = kafa2.getKimlikBase64();
+            sıra++;
+            kafa2 = kafa2.getSonraki();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(kafa2.tarih.get(Calendar.YEAR));
+        sb.append(" ");
+        sb.append((this.tarih.get(Calendar.MONTH) + 1));
+        sb.append(" ");
+        sb.append(this.tarih.get(Calendar.DAY_OF_MONTH));
+        sb.append(" ");
+        sb.append(this.tarih.get(Calendar.HOUR_OF_DAY));
+        sb.append(" ");
+        sb.append(this.tarih.get(Calendar.MINUTE));
+        sb.append(" ");
+        sb.append(this.tarih.get(Calendar.SECOND));
+        tarihler[sıra][0] = sb.toString();
+        tarihler[sıra][1] = kafa2.getAçıklama();
+        tarihler[sıra][2] = kafa2.getKimlikBase64();
+        
+        return tarihler;
+    }
+    
+    /**
      * En geçmişteki sıralı video nesnesini döndürür.
      * 
      * @return  Listenin en geçmişteki videosu
