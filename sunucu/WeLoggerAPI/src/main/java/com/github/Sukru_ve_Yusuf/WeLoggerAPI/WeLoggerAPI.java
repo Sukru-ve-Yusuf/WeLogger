@@ -19,7 +19,7 @@ import java.util.*;
 import org.apache.cxf.jaxrs.*;
 
 import java.io.*;
-import java.nio.file.Files;
+import java.nio.file.*;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.annotation.*;
@@ -57,6 +57,20 @@ public class WeLoggerAPI
         if (video_denet == null)
         {
             System.out.println("Video Denetçisi başlatılamadı.");
+            return;
+        }
+        
+        try
+        {
+            File kayıt_dizini = new File("./Videolar");
+            if (!kayıt_dizini.exists())
+            {
+                Files.createDirectory(kayıt_dizini.toPath());
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println("Videoların bulunduğu dizine ulaşılamadı.");
             return;
         }
         

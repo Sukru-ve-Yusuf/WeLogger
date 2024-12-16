@@ -231,6 +231,14 @@ public class VideoDenetçisi
                 .type("application/json").build();
     }
     
+    /**
+     * Kimliği belirtilen video dosyasını yanıta eklenti olarak gönderir.
+     * 
+     * @param oturum        Oturum kimliği
+     * @param kullanıcı     Kullanıcı kimliği
+     * @param video_kimliği İstenen videonun kimliği
+     * @return  Bulunursa 200 ile video dosyası, bulunamazsa 404
+     */
     @GET @Path("VideoAl/{VideoKimliği}") @Produces("video/mp4")
     public Response VideoAl(
             @HeaderParam("Oturum") String oturum,
@@ -285,12 +293,51 @@ public class VideoDenetçisi
                     .type("video/mp4")
                     .header("Content-Disposition",
                             "attachment; filename=\"" + kullanıcı + "_" +
-                                bulunan.getTarih().getTimeInMillis() + "\"")
+                                bulunan.getTarih().getTimeInMillis() + ".mp4\"")
                     .build();
         }
         catch (Exception e)
         {
             return bulunamadı;
         }
+    }
+    
+    @PUT @Path("/VideoYükle") @Consumes("video/mp4")
+    public Response VideoYükle(
+            @HeaderParam("Oturum") String oturum,
+            @HeaderParam("Kullanici") String kullanıcı,
+            @HeaderParam("VideoTarihi") Long tarih,
+            @HeaderParam("Content-Type") String content_type,
+            InputStream gövde)
+    {
+        OturumVT oturum_vt = VT.getOturumVT();
+        KullanıcıVT üye_vt = VT.getKullanıcıVT();
+        byte oturum_durumu = oturum_vt.OturumAçık(oturum, kullanıcı);
+        if (oturum_durumu != 1)
+        {
+            return Response.status(400).build();
+        }
+        
+        Kullanıcı iye = üye_vt.KullanıcıOku(kullanıcı);
+        
+        if (iye == null)
+        {
+            return Response.status(400).build();
+        }
+        
+        if (!content_type.equals("video/mp4"))
+        {
+            return Response.status(418).build();
+        }
+        
+        
+        /* 
+         * 
+         * Şu noktada pek gücüm kalmadı.
+         * 
+         * 
+         */
+        
+        return Response.status(500).build();
     }
 }

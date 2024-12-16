@@ -23,6 +23,7 @@ import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import com.mongodb.client.result.*;
 import static com.mongodb.client.model.Filters.*;
+import com.mongodb.client.model.*;
 
 /**
  * Videoların veri tabanı sorguları için bir hizmet sınıfı.
@@ -302,6 +303,77 @@ public class VideoVT
         {
             e.printStackTrace();
             return null;
+        }
+    }
+    
+    /**
+     * Belirtilen video listesinin veri tabanı kayıtlarını baştan aşağı
+     * değiştirir.
+     * 
+     * @param güncellenecek Yeni video listesi
+     * @return  Değişim başarılı olursa true, başarısız olursa false
+     */
+    public boolean VideolarıGüncelle(SıralıVideolar güncellenecek)
+    {
+        if (güncellenecek == null)
+            return false;
+        
+        try (MongoClient istemci = MongoClients.create(VT.getBağlantıDizesi()))
+        {
+            MongoDatabase veri_tabanı = istemci.getDatabase(
+                    VT.getVeriTabanıAdı());
+            MongoCollection<Document> koleksiyon = veri_tabanı.getCollection(
+                    this.KoleksiyonAdı);
+            
+            SıralıVideolar kafa = güncellenecek.Kök();
+            
+            ObjectMapper haritacı = new ObjectMapper();
+            
+            while (kafa.getSonraki() != null)
+            {
+                try
+                {
+                    String güncel_json = haritacı
+                            .writeValueAsString(kafa);
+                    Document güncel_doc = Document.parse(güncel_json);
+                    
+                    ReplaceOptions seçenekler = new ReplaceOptions()
+                            .upsert(true);
+                    
+                    UpdateResult işlem_sonucu = koleksiyon.replaceOne(
+                            eq("_id", kafa.getKimlikBase64()), güncel_doc,
+                            seçenekler);
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+                
+                kafa = kafa.getSonraki();
+            }
+            try
+            {
+                String güncel_json = haritacı
+                        .writeValueAsString(kafa);
+                Document güncel_doc = Document.parse(güncel_json);
+
+                ReplaceOptions seçenekler = new ReplaceOptions()
+                        .upsert(true);
+
+                UpdateResult işlem_sonucu = koleksiyon.replaceOne(
+                        eq("_id", kafa.getKimlikBase64()), güncel_doc,
+                        seçenekler);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+            
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
         }
     }
 }

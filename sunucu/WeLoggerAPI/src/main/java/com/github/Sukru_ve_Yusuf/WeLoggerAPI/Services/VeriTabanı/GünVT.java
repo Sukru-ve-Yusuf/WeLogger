@@ -280,4 +280,14 @@ public class GünVT
             return null;
         }
     }
+    
+    public byte Günücelle(SıralıGünler güncellenecek)
+    {
+        /*
+         * 
+         * Burada da pek gücüm kaldığı söylenemez.
+         * 
+         * 
+         */
+    }
 }
