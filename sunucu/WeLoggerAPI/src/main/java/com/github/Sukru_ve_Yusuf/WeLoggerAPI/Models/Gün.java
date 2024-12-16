@@ -154,6 +154,8 @@ public class Gün implements IKimlikli
     @JsonGetter("Açıklama")
     public String getAçıklama()
     {
+        if (this.açıklama == null)
+            return "";
         return this.açıklama;
     }
     /**

@@ -93,6 +93,16 @@ public class SıralıGünler extends Gün
         this.setÖnceki(null);
         this.setSonraki(null);
     }
+    /**
+     * Verilen bilgilerle eşsiz kimliği olan bir gün oluşturur.
+     * 
+     * @param başkahraman   Günü yaşayan kullanıcının kimliği
+     * @param açıklama      Gün hakkında açıklama metni
+     * @param tarih         Günün tarihi
+     * @param gün_vt        Kimlik eşsizliği için gün veri tabanı hizmeti
+     * 
+     * @seee GünVT
+     */
     public SıralıGünler(String başkahraman, String açıklama, Calendar tarih,
             GünVT gün_vt)
     {
@@ -191,6 +201,44 @@ public class SıralıGünler extends Gün
         {
             return null;
         }
+    }
+    
+    public String[][] TarihlerİleAçıklamalar()
+    {
+        SıralıGünler kafa1 = this.Kök();
+        SıralıGünler kafa2 = kafa1;
+        int nicelik = 1;
+        while (kafa1.getSonraki() != null)
+        {
+            nicelik++;
+            kafa1 = kafa1.getSonraki();
+        }
+        
+        String[][] tarihler = new String[nicelik][2];
+        int sıra = 0;
+        while (kafa2.getSonraki() != null)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(kafa2.tarih.get(Calendar.YEAR));
+            sb.append(" ");
+            sb.append((this.tarih.get(Calendar.MONTH) + 1));
+            sb.append(" ");
+            sb.append(this.tarih.get(Calendar.DAY_OF_MONTH));
+            tarihler[sıra][0] = sb.toString();
+            tarihler[sıra][1] = kafa2.getAçıklama();
+            sıra++;
+            kafa2 = kafa2.getSonraki();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(kafa2.tarih.get(Calendar.YEAR));
+        sb.append(" ");
+        sb.append((this.tarih.get(Calendar.MONTH) + 1));
+        sb.append(" ");
+        sb.append(this.tarih.get(Calendar.DAY_OF_MONTH));
+        tarihler[sıra][0] = sb.toString();
+        tarihler[sıra][1] = kafa2.getAçıklama();
+        
+        return tarihler;
     }
     
     /**

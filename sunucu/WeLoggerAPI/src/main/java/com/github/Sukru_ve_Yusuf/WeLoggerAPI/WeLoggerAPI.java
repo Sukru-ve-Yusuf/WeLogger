@@ -53,8 +53,15 @@ public class WeLoggerAPI
             return;
         }
         
+        VideoDenetçisi video_denet = VideoDenetçisi.Başlat(VT);
+        if (video_denet == null)
+        {
+            System.out.println("Video Denetçisi başlatılamadı.");
+            return;
+        }
+        
         //factoryBean.setResourceClasses(ÜyelikDenetçisi.class);
-        factoryBean.setServiceBean(üye_denet);
+        factoryBean.setServiceBeanObjects(üye_denet, video_denet);
         factoryBean.setAddress("http://localhost:9000/");
         factoryBean.create();
     }

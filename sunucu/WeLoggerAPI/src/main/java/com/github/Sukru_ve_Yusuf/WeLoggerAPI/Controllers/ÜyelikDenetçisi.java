@@ -22,10 +22,12 @@ import org.bson.Document;
 import com.fasterxml.jackson.databind.*;
 
 /**
- * Üyelik işlemlerini yürütmek üzere API denetçisi.
+ * Üyelik ve oturum işlemlerini yürütmek üzere API denetçisi.
  * 
  * @see Kullanıcı
+ * @see Oturum
  * @see KullanıcıVT
+ * @see OturumVT
  * @see ParolaHizmeti
  */
 @Path("/Üyelik")
@@ -40,6 +42,8 @@ public class ÜyelikDenetçisi
     
     /**
      * Yanlış oluşturmayı önlemek için gizli başlatıcı.
+     * 
+     * @param vt_hizmetleri Uygulamada kullanılan veri tabanı hizmetleri
      */
     private ÜyelikDenetçisi(VeriTabanıHizmetleri vt_hizmetleri)
     {
@@ -70,6 +74,8 @@ public class ÜyelikDenetçisi
      * @param Parola        Yeni kullanıcının parolası
      * @return  Yeni kullanıcı oluşturulursa 200, oluşturulmazsa 400,
      *          hata olursa 500
+     * 
+     * @see KullanıcıVT
      */
     @PUT @Path("ÜyeOl/{Ad}/{KullaniciAdi}/{Parola}/")
     public Response ÜyeOl(
@@ -121,6 +127,9 @@ public class ÜyelikDenetçisi
      * @param Parola        Oturum açan kullanıcının karılmamış parolası
      * @return  Yeni oturum başlatılırsa 200 ile oturum bilgilerini içeren JSON,
      *          başlatılmazsa 403, bilgiler girilmemişse 400, hata olursa 500
+     * 
+     * @see OturumVT
+     * @see KullanıcıVT
      */
     @POST @Path("OturumAç/{KullaniciAdi}/{Parola}/")
     @Produces("application/json")
@@ -176,6 +185,8 @@ public class ÜyelikDenetçisi
      * @param oturum    Oturum kimliği (Header'daki Oturum değişkeni)
      * @param kullanıcı Kullanıcı kimliği (Header'daki Kullanici değişkeni
      * @return  İşlemin başarılıysa 200, başarısızsa 500
+     * 
+     * @see OturumVT
      */
     @POST @Path("OturumKapat")
     public Response OturumKapat(
@@ -196,6 +207,8 @@ public class ÜyelikDenetçisi
      * @param oturum    Oturum kimliği (Header'daki Oturum değişkeni)
      * @param kullanıcı Kullanıcı kimliği (Header'daki Kullanici değişkeni)
      * @return  Oturum açıksa 200, kapalıysa 404, hata olursa 500
+     * 
+     * @see OturumVT
      */
     @POST @Path("OturumAçık")
     public Response OturumAçık(
