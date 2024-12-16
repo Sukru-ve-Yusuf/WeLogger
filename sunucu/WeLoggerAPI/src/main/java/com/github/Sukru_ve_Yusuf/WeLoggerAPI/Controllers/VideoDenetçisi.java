@@ -228,4 +228,67 @@ public class VideoDenetçisi
         return Response.status(200).entity(json.toString())
                 .type("application/json").build();
     }
+    
+    @GET @Path("VideoAl/{VideoKimliği}") @Produces("video/mp4")
+    public Response VideoAl(
+            @HeaderParam("Oturum") String oturum,
+            @HeaderParam("Kullanici") String kullanıcı,
+            @PathParam("VideoKimliği") String video_kimliği)
+    {
+        Response bulunamadı = Response.status(404).build();
+        
+        OturumVT oturum_vt = VT.getOturumVT();
+        KullanıcıVT üye_vt = VT.getKullanıcıVT();
+        byte oturum_durumu = oturum_vt.OturumAçık(oturum, kullanıcı);
+        if (oturum_durumu != 1)
+        {
+            return bulunamadı;
+        }
+        
+        Kullanıcı iye = üye_vt.KullanıcıOku(kullanıcı);
+        
+        if (iye == null)
+        {
+            return bulunamadı;
+        }
+        if (iye.getÖmür() == null)
+        {
+            return bulunamadı;
+        }
+        
+        VideoVT video_vt = VT.getVideoVT();
+        SıralıVideolar bulunan = video_vt.TekVideoOku(video_kimliği);
+        if (bulunan == null)
+        {
+            return bulunamadı;
+        }
+        if (!bulunan.getKimlikBase64().equals(kullanıcı))
+        {
+            return bulunamadı;
+        }
+        
+        try
+        {
+            File gidecek = new File(bulunan.getDosyaYolu());
+            if (!gidecek.exists())
+            {
+                return bulunamadı;
+            }
+            if (gidecek.isDirectory())
+            {
+                return bulunamadı;
+            }
+            
+            return Response.status(200).entity(gidecek)
+                    .type("video/mp4")
+                    .header("Content-Disposition",
+                            "attachment; filename=\"" + kullanıcı + "_" +
+                                bulunan.getTarih().getTimeInMillis() + "\"")
+                    .build();
+        }
+        catch (Exception e)
+        {
+            return bulunamadı;
+        }
+    }
 }
