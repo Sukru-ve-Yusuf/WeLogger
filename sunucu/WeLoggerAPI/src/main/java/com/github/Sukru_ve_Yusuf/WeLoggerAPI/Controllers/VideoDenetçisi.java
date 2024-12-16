@@ -302,6 +302,16 @@ public class VideoDenetçisi
         }
     }
     
+    /**
+     * Bu özellik tasarım aşamasında
+     * 
+     * @param oturum
+     * @param kullanıcı
+     * @param tarih
+     * @param content_type
+     * @param gövde
+     * @return 
+     */
     @PUT @Path("/VideoYükle") @Consumes("video/mp4")
     public Response VideoYükle(
             @HeaderParam("Oturum") String oturum,

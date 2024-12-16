@@ -281,6 +281,12 @@ public class GünVT
         }
     }
     
+    /**
+     * Bu özellik tasarım aşamasında
+     * 
+     * @param güncellenecek
+     * @return 
+     */
     public byte Günücelle(SıralıGünler güncellenecek)
     {
         /*
@@ -289,5 +295,6 @@ public class GünVT
          * 
          * 
          */
+        return -1;
     }
 }
